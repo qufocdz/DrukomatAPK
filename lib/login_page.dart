@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
             appBar: AppBar(
               title: const Text("Logowanie"),
               centerTitle: true,
+              automaticallyImplyLeading: false,
               backgroundColor: const Color(midnightGreen),
               foregroundColor: const Color(electricBlue),
             ),

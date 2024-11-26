@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> {
                 padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Imię i nazwisko:',
                       style:
@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Jan Kowalski',
+                      'Michał Pakuła',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -72,7 +72,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'jan.kowalski@example.com',
+                      'michal.pakula@gmail.com',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -86,7 +86,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      '+48 123 456 789',
+                      '+48 578 729 344',
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -102,6 +102,7 @@ class _MainPageState extends State<MainPage> {
             child: ElevatedButton(
               onPressed: () {
                 // Navigate back to the login page
+                loggedIn = false;
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
