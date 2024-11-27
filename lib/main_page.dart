@@ -1,4 +1,5 @@
 import 'package:aplikacjadrukomat/globals.dart';
+import 'package:aplikacjadrukomat/home_page.dart';
 import 'package:aplikacjadrukomat/map_page.dart';
 import 'package:aplikacjadrukomat/orders_page.dart';
 import 'package:aplikacjadrukomat/settings_page.dart';
@@ -14,17 +15,10 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
 
-  final Widget homePage = const Center(
-    child: Text(
-      'Główna',
-      style: TextStyle(fontSize: 24, color: Colors.white),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      homePage,
+      homePage(context),
       mapPage(context),
       ordersPage(context),
       settingsPage(context),
