@@ -10,6 +10,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  bool agreeToTerms = false;
+
   @override
   Widget build(BuildContext context) {
     return !loggedIn
@@ -153,13 +155,37 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       cursorColor: Color(midnightGreen),
                     ),
-                    const SizedBox(height: 24.0),
+                    const SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: agreeToTerms,
+                          activeColor: const Color(midnightGreen),
+                          side:
+                              const BorderSide(color: Colors.black, width: 2.0),
+                          onChanged: (value) {
+                            setState(() {
+                              agreeToTerms = value!;
+                            });
+                          },
+                        ),
+                        const Expanded(
+                          child: Text(
+                            "Wyrażam zgodę na regulamin i politykę prywatności.",
+                            style: TextStyle(color: Color(richBlack)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
                     ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          loggedIn = true;
-                        });
-                      },
+                      onPressed: agreeToTerms
+                          ? () {
+                              setState(() {
+                                loggedIn = true;
+                              });
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(midnightGreen),
                         foregroundColor: const Color(electricBlue),
