@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 Widget mapPage(BuildContext context) {
-  return GoogleMapWidget();
+  return const GoogleMapWidget();
 }
 
 class GoogleMapWidget extends StatefulWidget {
-  const GoogleMapWidget({Key? key}) : super(key: key);
+  const GoogleMapWidget({super.key});
 
   @override
   State<GoogleMapWidget> createState() => _GoogleMapWidgetState();
@@ -17,7 +17,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
 
   // Initial position for the map
   final LatLng _initialPosition =
-      const LatLng(51.107883, 17.038538); // Wroclaw, Poland
+      const LatLng(50.86500986794984, 15.68169157995246); // Wroclaw, Poland
 
   // Markers to display on the map
   final Set<Marker> _markers = {

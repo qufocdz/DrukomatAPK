@@ -30,13 +30,14 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    </application>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDKWSX0JDNfX9iEobTM91k5P53sdQyCf5s" />
+            android:value="AIzaSyBTN2_nVS3v9xwgU7AIF9stAg4wQd6quJE" />
+    </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
         <intent>
