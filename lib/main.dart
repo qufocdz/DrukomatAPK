@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:aplikacjadrukomat/login_page.dart';
+import 'mongodb.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await MongoDB.connect();
   runApp(const MyApp());
 }
 

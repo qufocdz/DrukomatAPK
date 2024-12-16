@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'globals.dart';
-import 'package:aplikacjadrukomat/main_page.dart';
-import 'package:aplikacjadrukomat/register_page.dart';
+import 'main_page.dart';
+import 'register_page.dart';
+import 'mongodb.dart'; // MongoDB helper class for connection
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,6 +12,61 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> loginUser() async {
+    final String email = emailController.text.trim();
+    final String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      showErrorDialog("Wprowadź zarówno email, jak i hasło.");
+      return;
+    }
+
+    try {
+      // Adjusted query to find the user with email in 'contact.email' field
+      final user = await MongoDB.userCollection.findOne({
+        "contact.email": email, // Now checking in the nested 'contact' field
+        "Password": password, // Hash password in production
+      });
+
+      if (user != null) {
+        print("Login successful: ${user['contact']['email']}");
+
+        setState(() {
+          loggedIn = true;
+        });
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      } else {
+        showErrorDialog("Nieprawidłowy email lub hasło.");
+      }
+    } catch (e) {
+      print("Login error: $e");
+      showErrorDialog("Logowanie się nie powiodło. Spróbuj ponownie później.");
+    }
+  }
+
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Błąd"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return !loggedIn
@@ -29,8 +85,9 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
                       labelText: "Email",
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -50,12 +107,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       labelStyle: TextStyle(color: Color(richBlack)),
                     ),
-                    cursorColor: Color(midnightGreen),
+                    cursorColor: const Color(midnightGreen),
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16.0),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    controller: passwordController,
+                    decoration: const InputDecoration(
                       labelText: "Hasło",
                       enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -75,16 +133,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       labelStyle: TextStyle(color: Color(richBlack)),
                     ),
-                    cursorColor: Color(midnightGreen),
+                    cursorColor: const Color(midnightGreen),
                     obscureText: true,
                   ),
                   const SizedBox(height: 24.0),
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        loggedIn = true;
-                      });
-                    },
+                    onPressed: loginUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(midnightGreen),
                       foregroundColor: const Color(electricBlue),
@@ -103,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                     style: TextButton.styleFrom(
-                      foregroundColor: const Color(richBlack), // Text color
+                      foregroundColor: const Color(richBlack),
                     ),
                     child: const Text(
                       "Nie masz konta? Kliknij tutaj, aby się zarejestrować.",
