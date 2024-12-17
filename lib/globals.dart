@@ -4,6 +4,8 @@ const MONGO_URL =
     "mongodb+srv://272796:drukomatdawid@users.tmgbk.mongodb.net/test?retryWrites=true&w=majority";
 const COLLECTION_USER = "User";
 const COLLECTION_DRUKOMAT = "drukomats";
+
+Map<String,dynamic>? user;
 bool loggedIn = false;
 const int richBlack = 0xFF001011;
 const int midnightGreen = 0xFF093A3E;
