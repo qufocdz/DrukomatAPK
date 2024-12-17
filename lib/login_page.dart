@@ -24,15 +24,10 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    try {
-      // Adjusted query to find the user with email in 'contact.email' field
-      final user = await MongoDB.userCollection.findOne({
-        "contact.email": email, // Now checking in the nested 'contact' field
-        "Password": password, // Hash password in production
-      });
-
+  try{
+      await MongoDB.login(email, password);
       if (user != null) {
-        print("Login successful: ${user['contact']['email']}");
+        print("Login successful: ${user?['contact']['email']}");
 
         setState(() {
           loggedIn = true;
@@ -44,11 +39,13 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         showErrorDialog("Nieprawidłowy email lub hasło.");
+        user=null;
       }
-    } catch (e) {
+  }catch (e) {
       print("Login error: $e");
       showErrorDialog("Logowanie się nie powiodło. Spróbuj ponownie później.");
     }
+    
   }
 
   void showErrorDialog(String message) {

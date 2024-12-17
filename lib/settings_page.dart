@@ -15,7 +15,7 @@ Widget settingsPage(BuildContext context) {
             elevation: 4,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +26,7 @@ Widget settingsPage(BuildContext context) {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Michał Pakuła',
+                    '${user?['FirstName']??'Nie podano'} ${user?['LastName']??''}',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -39,7 +39,7 @@ Widget settingsPage(BuildContext context) {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'michal.pakula@gmail.com',
+                    '${user?['contact']['email']}',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -52,7 +52,7 @@ Widget settingsPage(BuildContext context) {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    '+48 578 729 344',
+                    '${user?['contact']['phone']??'Nie podano'}',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -65,7 +65,7 @@ Widget settingsPage(BuildContext context) {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'ul. Grundwaldzka 54,',
+                    '${user?['contact']?['address']?['StreetAndNumber']??'Nie podano'}',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -73,7 +73,7 @@ Widget settingsPage(BuildContext context) {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    '50-357 Wrocław',
+                    '${user?['contact']?['address']?['PostalCode']??''} ${user?['contact']?['address']?['City']??''}',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
@@ -90,6 +90,7 @@ Widget settingsPage(BuildContext context) {
             onPressed: () {
               // Navigate back to the login page
               loggedIn = false;
+              user=null;
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginPage()),

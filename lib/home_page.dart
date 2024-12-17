@@ -16,10 +16,10 @@ Widget homePage(BuildContext context) {
               borderRadius: BorderRadius.circular(12),
             ),
             color: const Color(midnightGreen),
-            child: const Padding(
+            child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: const Text(
-                'Witaj, Michał Pakuła!',
+              child: Text(
+                'Witaj, ${user?['FirstName']} ${user?['LastName']}!',  // No `const` here
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
