@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aplikacjadrukomat/globals.dart';
+import 'package:aplikacjadrukomat/map_page.dart'; // Import the mapPage widget
 
 Widget homePage(BuildContext context) {
   return Padding(
@@ -17,8 +18,8 @@ Widget homePage(BuildContext context) {
             ),
             color: const Color(midnightGreen),
             child: const Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: const Text(
+              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Text(
                 'Witaj, Michał Pakuła!',
                 style: TextStyle(
                   fontSize: 28,
@@ -32,7 +33,12 @@ Widget homePage(BuildContext context) {
           const SizedBox(height: 40),
           GestureDetector(
             onTap: () {
-              // Akcja po kliknięciu w obrazek
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MapPage(),
+                ),
+              );
             },
             child: Image.asset(
               'images/kartki1.png',
