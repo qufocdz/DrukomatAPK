@@ -9,11 +9,12 @@ const COLLECTION_ORDERS = "Orders";
 class MongoDB {
   static late Db db;
   static late DbCollection userCollection;
-
+  static late DbCollection drukomatCollection;
   static Future<void> connect() async {
     var db = await Db.create(MONGO_URL);
     await db.open();
     userCollection = db.collection(COLLECTION_USER);
+    drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
   }
   static Future<void> login(String email,String password) async {
       
