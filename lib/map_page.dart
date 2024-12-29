@@ -25,16 +25,20 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> _loadDrukomats() async {
     try {
-      final List<Map<String, dynamic>> data =
-          await MongoDB.drukomatCollection.find(<String, dynamic>{}).toList();
+      List<Drukomat> drukomats = await MongoDB.fetchDrukomats();
+      print ("test $drukomats" );
 
-      if (data.isEmpty) {
-        print("No Drukomats found in the database.");
-        return;
-      }
-
-      List<Drukomat> drukomats =
-          data.map<Drukomat>((item) => Drukomat.fromMap(item)).toList();
+      // final List<Map<String, dynamic>> data =
+      //     await MongoDB.drukomatCollection.find(<String, dynamic>{}).toList();
+      // print("Fetched data: $data");
+      // if (data.isEmpty) {
+      //   print("No Drukomats found in the database.");
+      //   return;
+      // }
+//       List<Drukomat> drukomats = data.map<Drukomat>((item) {
+//   print('Item: $item'); // Wyświetla zawartość item
+//   return Drukomat.fromMap(item);
+// }).toList();
 
       setState(() {
         _markers.clear();
@@ -143,34 +147,39 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-class Drukomat {
-  final String name;
-  final LatLng location;
-  final String? address;
-  final String? city;
-  final String? status;
-  final String? description;
+// class Drukomat {
+//   final String name;
+//   final LatLng location;
+//   final String? address;
+//   final String? city;
+//   final int? status;
+//   final String? description;
 
-  Drukomat({
-    required this.name,
-    required this.location,
-    this.address,
-    this.city,
-    this.status,
-    this.description,
-  });
+//   Drukomat({
+//     required this.name,
+//     required this.location,
+//     this.address,
+//     this.city,
+//     this.status,
+//     this.description,
+//   });
 
-  factory Drukomat.fromMap(Map<String, dynamic> map) {
-    double latitude = (map['latitude'] as double?) ?? 0.0;
-    double longitude = (map['longitude'] as double?) ?? 0.0;
-
-    return Drukomat(
-      name: map['name'] ?? 'Unknown',
-      location: LatLng(latitude, longitude),
-      address: map['address'],
-      city: map['city'],
-      status: map['status'],
-      description: map['description'],
-    );
-  }
-}
+//   factory Drukomat.fromMap(Map<String, dynamic> map) {
+//     double latitude = double.tryParse(map['Latitude']?.toString() ?? '0.0') ?? 0.0;
+//     double longitude = double.tryParse(map['Longitude']?.toString() ?? '0.0') ?? 0.0;
+//     print("________________");
+//     print("nazwa ${map['Name']}");
+//     print("addres ${map['Address']}");
+//     print("miasto ${map['City']}");
+//     print("opis ${map['Description']}");
+//     print("________________");
+//     return Drukomat(
+//       name: map['Name'] ?? 'Unknown',
+//       location: LatLng(latitude, longitude),
+//       address: map['Address'],
+//       city: map['City'],
+//       status: map['Status'],
+//       description: map['Description'],
+//     );
+//   }
+// }

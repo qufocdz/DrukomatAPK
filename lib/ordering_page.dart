@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'map_page.dart';
 import 'globals.dart';
+import 'mongodb.dart';
 
 class OrderingPage extends StatelessWidget {
   final Drukomat drukomat;
@@ -27,7 +27,7 @@ class OrderingPage extends StatelessWidget {
             ),
           ),
           content: const Text(
-            'Twój koszyk nie zostanie zapisany. Czy na pewno chcesz wrócić?',
+            'Twój koszyk nie zostanie zapisany. Czy na pewno chcesz anulować zamówienie?',
             style: TextStyle(
               fontSize: 16,
               color: Color(richBlack), // Match body text color with the app
@@ -48,7 +48,7 @@ class OrderingPage extends StatelessWidget {
                 ),
               ),
               child: const Text(
-                'Anuluj',
+                'Nie',
                 style: TextStyle(fontSize: 16),
               ),
             ),
@@ -61,13 +61,13 @@ class OrderingPage extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor:
                     const Color(midnightGreen), // Button text color
-                backgroundColor: const Color(beige), // Button background color
+                backgroundColor: Colors.red, // Button background color
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               child: const Text(
-                'Wróć',
+                'Anuluj',
                 style: TextStyle(fontSize: 16),
               ),
             ),
@@ -170,7 +170,7 @@ class OrderingPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            drukomat.status ?? "Not available",
+                            drukomat.status.toString(),
                             style: const TextStyle(
                               color: Color(richBlack),
                             ),
