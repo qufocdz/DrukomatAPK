@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'globals.dart';
 import 'mongodb.dart';
+import 'add_to_order_page.dart';
 
-class OrderingPage extends StatelessWidget {
+class OrderingPage extends StatefulWidget {
   final Drukomat drukomat;
   final List<Map<String, dynamic>> currentOrderBasket = [];
 
   OrderingPage({super.key, required this.drukomat});
 
+  @override
+  _OrderingPageState createState() => _OrderingPageState();
+}
+
+class _OrderingPageState extends State<OrderingPage> {
   // Function to show the confirmation dialog with a customized style
   Future<void> _showExitDialog(BuildContext context) async {
     return showDialog<void>(
@@ -110,7 +116,7 @@ class OrderingPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        drukomat.name,
+                        widget.drukomat.name,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -130,27 +136,7 @@ class OrderingPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            drukomat.address ?? "Not available",
-                            style: const TextStyle(
-                              color: Color(richBlack),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Row for Miasto
-                      Row(
-                        children: [
-                          const Text(
-                            'Miasto: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold, // Make label bold
-                              color: Color(richBlack),
-                            ),
-                          ),
-                          Text(
-                            drukomat.city ?? "Not available",
+                            widget.drukomat.address ?? "Not available",
                             style: const TextStyle(
                               color: Color(richBlack),
                             ),
@@ -170,7 +156,9 @@ class OrderingPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            drukomat.status.toString(),
+                            widget.drukomat.status == 1
+                                ? "aktywny"
+                                : "nieaktywny",
                             style: const TextStyle(
                               color: Color(richBlack),
                             ),
@@ -178,25 +166,6 @@ class OrderingPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 10),
-
-                      // Row for Opis
-                      Row(
-                        children: [
-                          const Text(
-                            'Opis: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold, // Make label bold
-                              color: Color(richBlack),
-                            ),
-                          ),
-                          Text(
-                            drukomat.description ?? "Not available",
-                            style: const TextStyle(
-                              color: Color(richBlack),
-                            ),
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -227,7 +196,7 @@ class OrderingPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        currentOrderBasket.isEmpty
+                        widget.currentOrderBasket.isEmpty
                             ? const Text(
                                 "Twój koszyk jest pusty.",
                                 style: TextStyle(
@@ -235,13 +204,35 @@ class OrderingPage extends StatelessWidget {
                                 ),
                               )
                             : Column(
-                                children: currentOrderBasket
+                                children: widget.currentOrderBasket
+                                    .where((item) =>
+                                        item['fileName'] != null &&
+                                        item['fileName'] != '')
                                     .map(
-                                      (item) => Text(
-                                        "- ${item['itemName']} (x${item['quantity']})",
-                                        style: const TextStyle(
-                                          color: Color(richBlack),
-                                        ),
+                                      (item) => Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "- ${item['fileName']} (x${item['quantity']})",
+                                            style: const TextStyle(
+                                              color: Color(richBlack),
+                                            ),
+                                          ),
+                                          Text(
+                                            "  Format: ${item['format']}",
+                                            style: const TextStyle(
+                                              color: Color(richBlack),
+                                            ),
+                                          ),
+                                          Text(
+                                            "  Wydruk: ${item['isColorPrint'] ? 'Kolor' : 'Czarnobiały'}",
+                                            style: const TextStyle(
+                                              color: Color(richBlack),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10),
+                                        ],
                                       ),
                                     )
                                     .toList(),
@@ -251,8 +242,26 @@ class OrderingPage extends StatelessWidget {
                         // Smaller Add to Order Button
                         Center(
                           child: ElevatedButton(
-                            onPressed: () {
-                              // No functionality, button is just a placeholder
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AddToOrderPage()),
+                              );
+
+                              // Handle the result here
+                              if (result != null &&
+                                  result['file'] != null &&
+                                  result['file'] != '') {
+                                setState(() {
+                                  widget.currentOrderBasket.add({
+                                    'fileName': result['file'],
+                                    'isColorPrint': result['isColorPrint'],
+                                    'format': result['format'],
+                                    'quantity': result['copies'],
+                                  });
+                                });
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(

@@ -18,33 +18,53 @@ class MongoDB {
     userCollection = db.collection(COLLECTION_USER);
     drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
   }
-  static Future<void> findUser(String email,String password) async {
-      
+
+  static Future<void> findUser(String email, String password) async {
+    final userP = await MongoDB.userCollection.findOne({
+      "contact.email": email,
+      "Password": password,
+    });
+    print("Login : |$email| |$password|");
+
+    user = userP;
+    print("$user");
+  }
+
+  static Future<Map<String, dynamic>?> login(
+      String email, String password) async {
+    try {
       final userP = await MongoDB.userCollection.findOne({
-        "contact.email": email, 
-        "Password": password, 
+        "contact.email": email,
+        "Password": password,
       });
+
       print("Login : |$email| |$password|");
-      
-      user=userP;
-      print("$user");
-}
-static Future<List<Drukomat>> fetchDrukomats() async{
-  final List<Map<String, dynamic>> data =
-          await MongoDB.drukomatCollection.find(<String, dynamic>{}).toList();
-        if (data.isEmpty) {
-        print("No Drukomats found in the database.");
-        return [];
+
+      if (userP != null) {
+        return userP; // Return the user data if found
+      } else {
+        return null; // Return null if no user is found
       }
+    } catch (e) {
+      print("Error during login: $e");
+      return null; // Return null in case of an error
+    }
+  }
 
-      List<Drukomat> drukomats = data.map<Drukomat>((item) {
-  print('Item: $item'); // Wyświetla zawartość item
-  return Drukomat.fromMap(item);
-}).toList();
-return drukomats;
-}
+  static Future<List<Drukomat>> fetchDrukomats() async {
+    final List<Map<String, dynamic>> data =
+        await MongoDB.drukomatCollection.find(<String, dynamic>{}).toList();
+    if (data.isEmpty) {
+      print("No Drukomats found in the database.");
+      return [];
+    }
 
-
+    List<Drukomat> drukomats = data.map<Drukomat>((item) {
+      print('Item: $item'); // Wyświetla zawartość item
+      return Drukomat.fromMap(item);
+    }).toList();
+    return drukomats;
+  }
 }
 
 class Drukomat {
@@ -65,8 +85,10 @@ class Drukomat {
   });
 
   factory Drukomat.fromMap(Map<String, dynamic> map) {
-    double latitude = double.tryParse(map['Latitude']?.toString() ?? '0.0') ?? 0.0;
-    double longitude = double.tryParse(map['Longitude']?.toString() ?? '0.0') ?? 0.0;
+    double latitude =
+        double.tryParse(map['Latitude']?.toString() ?? '0.0') ?? 0.0;
+    double longitude =
+        double.tryParse(map['Longitude']?.toString() ?? '0.0') ?? 0.0;
     print("________________");
     print("nazwa ${map['Name']}");
     print("addres ${map['Address']}");
