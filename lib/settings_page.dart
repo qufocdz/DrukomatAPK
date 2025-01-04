@@ -44,7 +44,7 @@ Widget settingsPage(BuildContext context) {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '${user?['FirstName']??'Nie podano'} ${user?['LastName']??''}',
+                        '${user?['FirstName'] ?? 'Nie podano'} ${user?['LastName'] ?? ''}',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -72,7 +72,7 @@ Widget settingsPage(BuildContext context) {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '${user?['contact']['phone']??'Nie podano'}',
+                        '${user?['contact']['phone'] ?? 'Nie podano'}',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -86,7 +86,7 @@ Widget settingsPage(BuildContext context) {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '${user?['contact']?['address']?['StreetAndNumber']??'Nie podano'}',
+                        '${user?['contact']?['address']?['StreetAndNumber'] ?? 'Nie podano'}',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -94,7 +94,7 @@ Widget settingsPage(BuildContext context) {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        '${user?['contact']?['address']?['PostalCode']??''} ${user?['contact']?['address']?['City']??''}',
+                        '${user?['contact']?['address']?['PostalCode'] ?? ''} ${user?['contact']?['address']?['City'] ?? ''}',
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -110,8 +110,8 @@ Widget settingsPage(BuildContext context) {
                 onPressed: () {
                   // Set loggedIn to false and navigate to LoginPage
                   loggedIn = false;
-                  user=null;
-              Navigator.pushReplacement(
+                  user = null;
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
@@ -127,7 +127,7 @@ Widget settingsPage(BuildContext context) {
                 child: const Text(
                   'Wyloguj się',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(beige),
                     fontSize: 18,
                   ),
                 ),

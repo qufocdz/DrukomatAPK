@@ -18,10 +18,10 @@ Widget homePage(BuildContext context) {
             ),
             color: const Color(midnightGreen),
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               child: Text(
-                'Witaj, ${user?['FirstName']} ${user?['LastName']}!',  // No `const` here
-                style: TextStyle(
+                'Witaj, ${user?['FirstName']} ${user?['LastName']}!', // No `const` here
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

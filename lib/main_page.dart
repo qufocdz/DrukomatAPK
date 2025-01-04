@@ -1,6 +1,6 @@
 import 'package:aplikacjadrukomat/globals.dart';
 import 'package:aplikacjadrukomat/home_page.dart';
-import 'package:aplikacjadrukomat/orders_page.dart';
+import 'package:aplikacjadrukomat/orders_page.dart'; // Make sure OrdersPage is imported
 import 'package:aplikacjadrukomat/settings_page.dart';
 import 'package:flutter/material.dart';
 
@@ -53,10 +53,11 @@ class _MainPageState extends State<MainPage> {
       child: Center(
         child: GestureDetector(
           onTap: () {
+            // Navigate directly to OrdersPage
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ordersPage(context),
+                builder: (context) => const OrdersPage(), // Use OrdersPage here
               ),
             );
           },

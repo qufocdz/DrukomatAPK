@@ -37,6 +37,7 @@ dependencies:
   google_maps_flutter: ^2.10.0
   mongo_dart: ^0.10.3
   file_picker: ^5.2.2
+  pdfx: ^2.0.1
 
 dev_dependencies:
   flutter_test:

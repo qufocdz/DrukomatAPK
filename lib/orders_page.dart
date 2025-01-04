@@ -1,81 +1,145 @@
 import 'package:flutter/material.dart';
 import 'package:aplikacjadrukomat/globals.dart';
-import 'selected_order_page.dart'; // Import the page that displays the selected order
+import 'selected_order_page.dart'; // Import the page that shows order details
+import 'mongodb.dart';
 
-Widget ordersPage(BuildContext context) {
-  final List<Map<String, String>> orders = [
-    {"number": "00043345", "status": "Gotowe do odbioru", "price": "50 PLN"},
-    {"number": "00042694", "status": "Oczekujące", "price": "100 PLN"},
-    {"number": "00042393", "status": "Oczekujące", "price": "30 PLN"},
-    {"number": "00041742", "status": "Oczekujące", "price": "30 PLN"},
-    {"number": "00032851", "status": "W trakcie drukowania", "price": "30 PLN"},
-    {"number": "00032340", "status": "W trakcie drukowania", "price": "30 PLN"},
-    {"number": "00032432", "status": "W trakcie drukowania", "price": "30 PLN"},
-    {"number": "00028338", "status": "Odebrane", "price": "30 PLN"},
-    {"number": "00022537", "status": "Odebrane", "price": "30 PLN"},
-    {"number": "00015336", "status": "Odebrane", "price": "30 PLN"},
-    {"number": "00012335", "status": "Odebrane", "price": "30 PLN"},
-  ];
+class OrdersPage extends StatefulWidget {
+  const OrdersPage({Key? key}) : super(key: key);
 
-  return Scaffold(
-    backgroundColor: const Color(verdigris), // Apply background color
-    appBar: AppBar(
-      title: const Text("Zamówienia"),
-      centerTitle: true,
-      backgroundColor: const Color(midnightGreen), // AppBar background color
-      foregroundColor: const Color(electricBlue), // AppBar text color
-    ),
-    body: RawScrollbar(
-      thumbColor: const Color(midnightGreen), // Apply the scrollbar thumb color
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return GestureDetector(
-            onTap: () {
-              // Navigate to the SelectedOrderPage when an order is tapped
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SelectedOrderPage(order: order),
-                ),
-              );
-            },
-            child: Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              color: const Color(beige), // Card background color
-              child: ListTile(
-                title: Text(
-                  'Nr. druku #${order["number"]}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(midnightGreen), // Title text color
-                  ),
-                ),
-                subtitle: Text(
-                  'Status: ${order["status"]}',
-                  style: const TextStyle(
-                    color: Color(richBlack), // Subtitle text color
-                  ),
-                ),
-                trailing: const Text(
-                  'Więcej',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(richBlack), // Trailing text color
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+  @override
+  _OrdersPageState createState() => _OrdersPageState();
+}
+
+class _OrdersPageState extends State<OrdersPage> {
+  List<Map<String, dynamic>> orders =
+      []; // To store orders fetched from MongoDB
+  bool isLoading = true; // Track if data is being loaded
+
+  // Function to fetch orders
+  Future<void> fetchOrders() async {
+    try {
+      if (user != null && user!['_id'] != null) {
+        String userID = user!['_id'].toHexString();
+        final fetchedOrders = await MongoDB.fetchOrders(userID);
+        setState(() {
+          orders = fetchedOrders;
+          isLoading = false;
+        });
+      } else {
+        print("User is not logged in or userID is null.");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching orders: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrders();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(verdigris),
+      appBar: AppBar(
+        title: const Text("Zamówienia"),
+        centerTitle: true,
+        backgroundColor: const Color(midnightGreen),
+        foregroundColor: const Color(electricBlue),
       ),
-    ),
-  );
+      body: RawScrollbar(
+        thumbColor: const Color(midnightGreen),
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : orders.isEmpty
+                ? Center(
+                    child:
+                        Text("Brak zamówień", style: TextStyle(fontSize: 18)),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index];
+
+                      // Extract CreationDate timestamp and convert it to DateTime
+                      final creationTimestamp = order["CreationDate"].seconds;
+                      final creationDate = DateTime.fromMillisecondsSinceEpoch(
+                          creationTimestamp * 1000);
+                      final formattedDate =
+                          "${creationDate.year}-${creationDate.month.toString().padLeft(2, '0')}-${creationDate.day.toString().padLeft(2, '0')} ${creationDate.hour.toString().padLeft(2, '0')}:${creationDate.minute.toString().padLeft(2, '0')}";
+
+                      final orderStatus = getStatus(order["Status"]);
+
+                      final orderNumber = (creationTimestamp / 1000).toInt();
+
+                      return GestureDetector(
+                        onTap: () {
+                          // Navigate to the OrderDetailPage when an order is tapped
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectedOrderPage(
+                                order: order,
+                              ), // Pass order to the details page
+                            ),
+                          );
+                        },
+                        child: Card(
+                          elevation: 4,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          color: const Color(beige),
+                          child: ListTile(
+                            title: Text(
+                              'Nr. druku #$orderNumber', // Use last 8 characters of _id as order number
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(midnightGreen)),
+                            ),
+                            subtitle: Text(
+                              'Data zamówienia: $formattedDate',
+                              style: const TextStyle(
+                                  fontSize: 14, color: Color(richBlack)),
+                            ),
+                            trailing: Text(
+                              orderStatus,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(midnightGreen)),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+      ),
+    );
+  }
+
+  String getStatus(int? status) {
+    switch (status) {
+      case 1:
+        return 'Oczekujące';
+      case 2:
+        return 'W trakcie drukowania';
+      case 3:
+        return 'Gotowe do odbioru';
+      case 4:
+        return 'Odebrane';
+      default:
+        return 'Nieznany status';
+    }
+  }
 }

@@ -12,11 +12,17 @@ class MongoDB {
   static late Db db;
   static late DbCollection userCollection;
   static late DbCollection drukomatCollection;
+  static late DbCollection ordersCollection;
+
+  // Correcting the connect method
   static Future<void> connect() async {
-    var db = await Db.create(MONGO_URL);
+    db = await Db.create(MONGO_URL); // Correcting the initialization of db
     await db.open();
     userCollection = db.collection(COLLECTION_USER);
     drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
+    ordersCollection =
+        db.collection(COLLECTION_ORDERS); // Initialize orders collection
+    print("Database connected and collections initialized.");
   }
 
   static Future<void> findUser(String email, String password) async {
@@ -41,12 +47,17 @@ class MongoDB {
       print("Login : |$email| |$password|");
 
       if (userP != null) {
+        user = userP; // Set the global variable
+        print("User logged in: $user");
         return userP; // Return the user data if found
       } else {
-        return null; // Return null if no user is found
+        user = null; // Clear user on failed login
+        print("User not found.");
+        return null;
       }
     } catch (e) {
       print("Error during login: $e");
+      user = null; // Clear user on error
       return null; // Return null in case of an error
     }
   }
@@ -64,6 +75,30 @@ class MongoDB {
       return Drukomat.fromMap(item);
     }).toList();
     return drukomats;
+  }
+
+  // Modify the fetchOrders method to accept a userID and filter orders by that userID
+  static Future<List<Map<String, dynamic>>> fetchOrders(String userID) async {
+    try {
+      // Convert the userID to an ObjectId since MongoDB stores it as ObjectId
+      var objectId = ObjectId.fromHexString(userID);
+
+      // Filter the orders collection by the user's ObjectId
+      final List<Map<String, dynamic>> data = await MongoDB.ordersCollection
+          .find(
+              {'UserID': objectId}) // Filter orders by userID (_id in MongoDB)
+          .toList();
+
+      if (data.isEmpty) {
+        print("No orders found for user: $userID.");
+        return [];
+      }
+
+      return data;
+    } catch (e) {
+      print("Error fetching orders for user $userID: $e");
+      return [];
+    }
   }
 }
 
