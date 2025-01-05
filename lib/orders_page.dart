@@ -21,6 +21,13 @@ class _OrdersPageState extends State<OrdersPage> {
       if (user != null && user!['_id'] != null) {
         String userID = user!['_id'].toHexString();
         final fetchedOrders = await MongoDB.fetchOrders(userID);
+
+        fetchedOrders.sort((b, a) {
+          final creationDateA = a["CreationDate"];
+          final creationDateB = b["CreationDate"];
+          return creationDateA.compareTo(creationDateB);
+        });
+
         setState(() {
           orders = fetchedOrders;
           isLoading = false;
@@ -70,16 +77,17 @@ class _OrdersPageState extends State<OrdersPage> {
                     itemBuilder: (context, index) {
                       final order = orders[index];
 
-                      // Extract CreationDate timestamp and convert it to DateTime
-                      final creationTimestamp = order["CreationDate"].seconds;
-                      final creationDate = DateTime.fromMillisecondsSinceEpoch(
-                          creationTimestamp * 1000);
-                      final formattedDate =
+                      // Extract CreationDate and ensure it is in DateTime format
+                      final creationDate = order[
+                          "CreationDate"]; // Assuming CreationDate is stored as a Date
+                      final formattedCreationDate =
                           "${creationDate.year}-${creationDate.month.toString().padLeft(2, '0')}-${creationDate.day.toString().padLeft(2, '0')} ${creationDate.hour.toString().padLeft(2, '0')}:${creationDate.minute.toString().padLeft(2, '0')}";
 
                       final orderStatus = getStatus(order["Status"]);
 
-                      final orderNumber = (creationTimestamp / 1000).toInt();
+                      final orderNumber =
+                          order["CreationDate"].millisecondsSinceEpoch ~/
+                              1000; // Using milliseconds as order number
 
                       return GestureDetector(
                         onTap: () {
@@ -101,14 +109,14 @@ class _OrdersPageState extends State<OrdersPage> {
                           color: const Color(beige),
                           child: ListTile(
                             title: Text(
-                              'Nr. druku #$orderNumber', // Use last 8 characters of _id as order number
+                              'Nr. druku #$orderNumber', // Use CreationDate for order number
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Color(midnightGreen)),
                             ),
                             subtitle: Text(
-                              'Data zamówienia: $formattedDate',
+                              'Data zamówienia: $formattedCreationDate',
                               style: const TextStyle(
                                   fontSize: 14, color: Color(richBlack)),
                             ),

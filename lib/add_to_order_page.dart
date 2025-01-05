@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:pdfx/pdfx.dart';
@@ -18,6 +21,7 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
   int numberOfCopies = 1; // Default number of copies
   PdfControllerPinch? pdfController; // Controller for the PDF viewer
   bool isPdfAttached = false; // Flag to indicate if a PDF is attached
+  String? base64EncodedFile; // Base64 encoded file content
 
   // Method to calculate the price based on selected options
   double _calculatePrice() {
@@ -50,14 +54,14 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
         PlatformFile file = result.files.first;
 
         // Dispose the previous PdfControllerPinch
-        pdfController?.dispose(); // Remove 'await' here
+        pdfController?.dispose();
 
         setState(() {
           attachedFileName = file.name;
           isPdfAttached = file.extension == 'pdf';
 
           // Reset the pdfController when a new file is picked
-          pdfController = null; // Clear any existing PDF controller
+          pdfController = null;
 
           if (isPdfAttached) {
             // Only create a new controller if the file is a PDF
@@ -65,7 +69,14 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
               document: PdfDocument.openFile(file.path!),
             );
           }
+
+          // Convert file to Base64
+          File pickedFile = File(file.path!);
+          base64EncodedFile = base64Encode(pickedFile.readAsBytesSync());
         });
+
+        print(
+            "File converted to Base64: ${base64EncodedFile?.substring(0, 50)}...");
       } else {
         print("No file picked.");
       }
@@ -97,7 +108,7 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
     return Scaffold(
       backgroundColor: const Color(verdigris), // Background color
       appBar: AppBar(
-        title: const Text("Dodaj do zamówienia"),
+        title: const Center(child: Text("Dodaj do zamówienia")),
         backgroundColor: const Color(midnightGreen), // Use midnightGreen
         foregroundColor: const Color(electricBlue), // Use electricBlue
       ),
@@ -131,12 +142,35 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      onPressed: () async {
+                        // Navigate to TemplatesPage and wait for the result
+                        final result = await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const TemplatesPage(),
                           ),
                         );
+
+                        if (result != null) {
+                          // If a result is returned, update the file, name, and encoded file
+                          final file = result['file'];
+                          final fileName = result['name'];
+                          final encodedFile = result[
+                              'encodedFile']; // Get the Base64-encoded file
+
+                          // Update the state with the selected PDF file, name, and encoded file
+                          setState(() {
+                            attachedFileName = fileName;
+                            isPdfAttached = true;
+                            base64EncodedFile =
+                                encodedFile; // Store the encoded file
+                            // Reset the pdfController to display the new PDF file
+                            pdfController
+                                ?.dispose(); // Dispose previous controller
+                            pdfController = PdfControllerPinch(
+                              document: PdfDocument.openFile(file.path),
+                            );
+                          });
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(midnightGreen),
@@ -152,7 +186,7 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                         "Dodaj druk z szablonu",
                         style: TextStyle(fontSize: 14),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -180,11 +214,14 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          attachedFileName!,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(richBlack),
+                        Center(
+                          child: Text(
+                            attachedFileName!,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(richBlack),
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -194,22 +231,25 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                             child: GestureDetector(
                               onHorizontalDragUpdate: (details) {
                                 if (details.primaryDelta! < 0) {
-                                  // Swipe left (next page)
                                   pdfController!.nextPage(
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeInOut,
                                   );
                                 } else if (details.primaryDelta! > 0) {
-                                  // Swipe right (previous page)
                                   pdfController!.previousPage(
                                     duration: const Duration(milliseconds: 300),
                                     curve: Curves.easeInOut,
                                   );
                                 }
                               },
-                              child: PdfViewPinch(
-                                controller: pdfController!,
-                                scrollDirection: Axis.horizontal,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: PdfView(
+                                  controller: PdfController(
+                                    document: pdfController!.document,
+                                  ),
+                                  scrollDirection: Axis.horizontal,
+                                ),
                               ),
                             ),
                           ),
@@ -361,6 +401,7 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                   onPressed: () {
                     Navigator.of(context).pop({
                       'file': attachedFileName,
+                      'base64File': base64EncodedFile, // Send Base64 data
                       'isColorPrint': isColorPrint,
                       'format': selectedFormat,
                       'copies': numberOfCopies,

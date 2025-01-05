@@ -7,12 +7,14 @@ const MONGO_URL =
 const COLLECTION_USER = "User";
 const COLLECTION_ORDERS = "Orders";
 const COLLECTION_DRUKOMAT = "Drukomat";
+const COLLECTION_DRAFTS = "Drafts";
 
 class MongoDB {
   static late Db db;
   static late DbCollection userCollection;
   static late DbCollection drukomatCollection;
   static late DbCollection ordersCollection;
+  static late DbCollection draftsCollection;
 
   // Correcting the connect method
   static Future<void> connect() async {
@@ -20,8 +22,8 @@ class MongoDB {
     await db.open();
     userCollection = db.collection(COLLECTION_USER);
     drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
-    ordersCollection =
-        db.collection(COLLECTION_ORDERS); // Initialize orders collection
+    ordersCollection = db.collection(COLLECTION_ORDERS);
+    draftsCollection = db.collection(COLLECTION_DRAFTS);
     print("Database connected and collections initialized.");
   }
 
@@ -100,9 +102,47 @@ class MongoDB {
       return [];
     }
   }
+
+  // Add this method to save orders to the database
+  static Future<void> saveOrder(Map<String, dynamic> orderData) async {
+    try {
+      await MongoDB.ordersCollection.insert(orderData);
+      print("Order saved to database: $orderData");
+    } catch (e) {
+      print("Error saving order to database: $e");
+    }
+  }
+
+  // Function to fetch Drafts collection and return encoded PDFs
+  static Future<List<Map<String, dynamic>>> fetchDrafts() async {
+    try {
+      // Fetch all documents from the 'Drafts' collection
+      final List<Map<String, dynamic>> data =
+          await draftsCollection.find(<String, dynamic>{}).toList();
+
+      if (data.isEmpty) {
+        print("No drafts found in the database.");
+        return [];
+      }
+
+      // Map and return the results with the base64-encoded PDFs
+      return data.map((doc) {
+        return {
+          'name':
+              doc['name'], // Can be changed based on the document's metadata
+          'pdfBase64': doc[
+              'encodedFile'], // Assuming 'encodedFile' holds the base64 string
+        };
+      }).toList();
+    } catch (e) {
+      print("Error fetching drafts: $e");
+      return [];
+    }
+  }
 }
 
 class Drukomat {
+  final ObjectId drukomatID;
   final String name;
   final LatLng location;
   final String? address;
@@ -111,6 +151,7 @@ class Drukomat {
   final String? description;
 
   Drukomat({
+    required this.drukomatID,
     required this.name,
     required this.location,
     this.address,
@@ -131,6 +172,7 @@ class Drukomat {
     print("opis ${map['Description']}");
     print("________________");
     return Drukomat(
+      drukomatID: map['_id'],
       name: map['Name'] ?? 'Unknown',
       location: LatLng(latitude, longitude),
       address: map['Address'],

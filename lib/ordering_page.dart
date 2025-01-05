@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'globals.dart';
 import 'mongodb.dart';
@@ -83,13 +85,31 @@ class _OrderingPageState extends State<OrderingPage> {
   double _calculateTotalPrice() {
     double totalPrice = 0;
     for (var item in widget.currentOrderBasket) {
-      totalPrice += item['price']; // Adjusted to account for quantity
+      totalPrice += item['price'];
     }
     return totalPrice;
   }
 
+  // Helper Method for generating a random collection code
+  String _generateRandomCollectionCode() {
+    final random = Random();
+    final letter = String.fromCharCode(random.nextInt(26) + 65); // A to Z
+    final digits =
+        random.nextInt(100000).toString().padLeft(5, '0'); // Random 5 digits
+
+    return '$letter$digits'; // Random collection code, e.g. "A12345"
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Split the address into 3 parts (street, city, postal code)
+    final addressParts = widget.drukomat.address?.split(',') ?? [];
+
+    // Ensure that we have at least 3 parts, if not, use empty strings
+    final street = addressParts.length > 0 ? addressParts[0].trim() : '';
+    final city = addressParts.length > 1 ? addressParts[1].trim() : '';
+    final postalCode = addressParts.length > 2 ? addressParts[2].trim() : '';
+
     return WillPopScope(
       onWillPop: () async {
         await _showExitDialog(context);
@@ -103,7 +123,6 @@ class _OrderingPageState extends State<OrderingPage> {
           foregroundColor: const Color(electricBlue),
         ),
         body: SingleChildScrollView(
-          // Make the body scrollable
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -132,14 +151,50 @@ class _OrderingPageState extends State<OrderingPage> {
                         Row(
                           children: [
                             const Text(
-                              'Adres: ',
+                              'Ulica: ',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Color(richBlack),
                               ),
                             ),
                             Text(
-                              widget.drukomat.address ?? "Not available",
+                              street.isNotEmpty ? street : "Brak",
+                              style: const TextStyle(
+                                color: Color(richBlack),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Text(
+                              'Miasto: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(richBlack),
+                              ),
+                            ),
+                            Text(
+                              city.isNotEmpty ? city : "Brak",
+                              style: const TextStyle(
+                                color: Color(richBlack),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            const Text(
+                              'Kraj: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(richBlack),
+                              ),
+                            ),
+                            Text(
+                              postalCode.isNotEmpty ? postalCode : "Brak",
                               style: const TextStyle(
                                 color: Color(richBlack),
                               ),
@@ -258,6 +313,7 @@ class _OrderingPageState extends State<OrderingPage> {
                                       'format': result['format'],
                                       'quantity': result['copies'],
                                       'price': result['price'], // Add price
+                                      'encodedFile': result['base64File'],
                                     });
                                   });
                                 }
@@ -321,14 +377,38 @@ class _OrderingPageState extends State<OrderingPage> {
                   onPressed: widget.currentOrderBasket.isEmpty
                       ? null
                       : () {
-                          // Calculate the total price and pass it to the PaymentPage
+                          // Calculate total price and prepare order data
                           double totalPrice = _calculateTotalPrice();
 
+                          // Prepare individual orders for each item
+                          List<Map<String, dynamic>> ordersData =
+                              widget.currentOrderBasket.map((item) {
+                            return {
+                              'drukomatID': widget.drukomat.drukomatID,
+                              'file': {
+                                'fileName': item['fileName'],
+                                'isColorPrint': item['isColorPrint'],
+                                'format': item['format'],
+                                'quantity': item['quantity'],
+                                'encodedFile': item['encodedFile'],
+                              },
+                              'totalPrice': item['price'],
+                              'userID': user?['_id'],
+                              'orderDate': DateTime.now().toIso8601String(),
+                              'status': 1,
+                              'collectionCode': _generateRandomCollectionCode(),
+                              'completionDate': null,
+                            };
+                          }).toList();
+
+                          // Navigate to PaymentPage with ordersData
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => PaymentPage(
-                                  totalPrice: totalPrice), // Passing the price
+                                orders: ordersData,
+                                totalPrice: totalPrice,
+                              ),
                             ),
                           );
                         },

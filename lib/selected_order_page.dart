@@ -10,9 +10,8 @@ class SelectedOrderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Extracting order details
-    final creationTimestamp = order["CreationDate"].seconds;
-    final creationDate =
-        DateTime.fromMillisecondsSinceEpoch(creationTimestamp * 1000);
+    final creationDate = order[
+        "CreationDate"]; // Using toDate() to convert Firestore Date to DateTime
     final formattedDate =
         "${creationDate.year}-${creationDate.month.toString().padLeft(2, '0')}-${creationDate.day.toString().padLeft(2, '0')} ${creationDate.hour.toString().padLeft(2, '0')}:${creationDate.minute.toString().padLeft(2, '0')}";
 
@@ -20,17 +19,19 @@ class SelectedOrderPage extends StatelessWidget {
 
     // Extracting file information
     final file = order["File"];
-    final quantity = file["Quantity"];
-    final color = file["Color"];
-    final format = file["Format"];
-    final userFile = file["UserFile"];
-    final orderNumber = (creationTimestamp / 1000).toInt();
+    final quantity = file["quantity"];
+    final color = file["isColorPrint"];
+    final format = file["format"];
+    final userFile = file["fileName"];
+    final orderNumber = (creationDate.millisecondsSinceEpoch / 1000)
+        .toInt(); // Use milliseconds for order number
 
     // Extract and format the completion date from the database
     String? formattedCompletionDate;
     if (order["CompletionDate"] != null &&
         (order["Status"] == 3 || order["Status"] == 4)) {
-      final completionDate = order["CompletionDate"];
+      final completionDate = order["CompletionDate"]
+          .toDate(); // Convert Firestore Date to DateTime
       formattedCompletionDate =
           "${completionDate.year}-${completionDate.month.toString().padLeft(2, '0')}-${completionDate.day.toString().padLeft(2, '0')} ${completionDate.hour.toString().padLeft(2, '0')}:${completionDate.minute.toString().padLeft(2, '0')}";
     }
@@ -53,7 +54,7 @@ class SelectedOrderPage extends StatelessWidget {
             // Card with status, creation date, and completion date
             _buildDetailCard(
               context,
-              title: 'Informacje o wykonaniu zamówienia',
+              title: 'Informacje o realizacji zamówienia',
               details: [
                 _buildOrderDetailRow('Status zamówienia:', orderStatus),
                 _buildOrderDetailRow('Data zamówienia:', formattedDate),
