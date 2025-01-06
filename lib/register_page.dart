@@ -65,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
         setState(() {
           loggedIn = true;
         });
-
+        user = userData;
         // Navigate to the main page
         Navigator.push(
           context,
