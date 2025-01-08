@@ -1,6 +1,7 @@
 import 'package:aplikacjadrukomat/globals.dart';
 import 'package:aplikacjadrukomat/home_page.dart';
-import 'package:aplikacjadrukomat/orders_page.dart'; // Make sure OrdersPage is imported
+import 'package:aplikacjadrukomat/home_page_2.dart';
+import 'package:aplikacjadrukomat/home_page_3.dart';
 import 'package:aplikacjadrukomat/settings_page.dart';
 import 'package:flutter/material.dart';
 
@@ -46,37 +47,27 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-
-  Widget secondHomePage(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: GestureDetector(
-          onTap: () {
-            // Navigate directly to OrdersPage
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const OrdersPage(), // Use OrdersPage here
-              ),
-            );
-          },
-          child: Image.asset(
-            'images/kartki2.png',
-            height: 380.0,
-            width: 240.0,
-          ),
-        ),
-      ),
-    );
-  }
+  
+  
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
+    final List<Widget> pages;
+    int cDots = 2;
+    if(service == true){
+      pages = [
+      homePage(context),
+      secondHomePage(context),
+      thirdHomePage(context),
+    ];
+    cDots = 3;
+    }else{
+      pages = [
       homePage(context),
       secondHomePage(context),
     ];
+    cDots = 2;
+    };
 
     return Scaffold(
       backgroundColor: const Color(verdigris),
@@ -109,7 +100,7 @@ class _MainPageState extends State<MainPage> {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(2, _buildDot),
+          children: List.generate(cDots, _buildDot),
         ),
       ),
     );

@@ -8,6 +8,7 @@ const COLLECTION_USER = "User";
 const COLLECTION_ORDERS = "Orders";
 const COLLECTION_DRUKOMAT = "Drukomat";
 const COLLECTION_DRAFTS = "Drafts";
+const COLLECTION_MALFUNCTION = "Malfunction";
 
 class MongoDB {
   static late Db db;
@@ -15,6 +16,7 @@ class MongoDB {
   static late DbCollection drukomatCollection;
   static late DbCollection ordersCollection;
   static late DbCollection draftsCollection;
+  static late DbCollection malfunctionCollection;
 
   // Correcting the connect method
   static Future<void> connect() async {
@@ -24,6 +26,7 @@ class MongoDB {
     drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
     ordersCollection = db.collection(COLLECTION_ORDERS);
     draftsCollection = db.collection(COLLECTION_DRAFTS);
+    malfunctionCollection = db.collection(COLLECTION_MALFUNCTION);
     print("Database connected and collections initialized.");
   }
 
@@ -51,6 +54,10 @@ class MongoDB {
       if (userP != null) {
         user = userP; // Set the global variable
         print("User logged in: $user");
+        if(userP['AccessLevel'] >= 2){
+          service = true;
+        }else{service = false;};
+        print("status: ${service}\n");
         return userP; // Return the user data if found
       } else {
         user = null; // Clear user on failed login
@@ -139,6 +146,34 @@ class MongoDB {
       return [];
     }
   }
+  
+  static Future<List<ErrorReport>> findErrorReports() async {
+    
+    print(user!["_id"]);
+  try {
+    
+    final List<Map<String, dynamic>> reports = await MongoDB.malfunctionCollection
+        .find({
+          "\$or": [
+            {"Status": true},
+            //{"Status": "\$oid 67615ba4a34a5613f6e06304"}
+          ]
+        })
+        .toList();
+    print(reports);
+
+    if (reports.isEmpty) {
+      print("No error reports found with the given criteria.");
+      return [];
+    }
+
+    // Convert each report into an ErrorReport object
+    return reports.map((report) => ErrorReport.fromMap(report)).toList();
+  } catch (e) {
+    print("Error fetching error reports: $e");
+    return [];
+  }
+}
 }
 
 class Drukomat {
@@ -182,3 +217,53 @@ class Drukomat {
     );
   }
 }
+
+class ErrorReport {
+  final String drukomatName;
+  final int errorCode;
+  final DateTime date;
+  final bool status;
+  final String? userID;
+
+  ErrorReport({
+    required this.drukomatName,
+    required this.errorCode,
+    required this.date,
+    required this.status,
+    this.userID,
+  });
+
+
+  factory ErrorReport.fromMap(Map<String, dynamic> map) {
+  // Sprawdź, czy Date jest DateTime, czy obiektem Timestamp
+  DateTime parsedDate;
+  if (map['Date'] is DateTime) {
+    parsedDate = map['Date']; // ISODate jest automatycznie mapowany na DateTime
+  } else if (map['Date'] is Map<String, dynamic> && map['Date']['t'] != null) {
+    // Obsługa daty jako Timestamp (np. {"t": 1672531200})
+    parsedDate = DateTime.fromMillisecondsSinceEpoch(
+        (map['Date']['t'] as int) * 1000);
+  } else {
+    throw ArgumentError("Invalid date format in map['Date']");
+  }
+
+  return ErrorReport(
+    drukomatName: map['DrukomatName'],
+    errorCode: map['ErrorCode'],
+    date: parsedDate,
+    status: map['Status'] as bool,
+    userID: map['UserID']?['\$oid'],
+  );
+} 
+
+  Map<String, dynamic> toMap() {
+    return {
+      'DrukomatName': drukomatName,
+      'ErrorCode': errorCode,
+      'Date': date.millisecondsSinceEpoch ~/ 1000,
+      'Status': status,
+      'UserID': userID,
+    };
+  }
+}
+

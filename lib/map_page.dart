@@ -17,7 +17,7 @@ class _MapPageState extends State<MapPage> {
   Drukomat? selectedDrukomat; // To store the selected drukomat
 
   final LatLng _initialPosition =
-      const LatLng(50.86500986794984, 15.68169157995246);
+      LatLng(50.86500986794984, 15.68169157995246);
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;

@@ -1,6 +1,7 @@
 library globals;
 
 bool loggedIn = false;
+bool service = false;
 Map<String, dynamic>? user;
 const int richBlack = 0xFF001011;
 const int midnightGreen = 0xFF093A3E;
