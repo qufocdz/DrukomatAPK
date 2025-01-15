@@ -3,6 +3,10 @@ import 'package:aplikacjadrukomat/globals.dart';
 import 'package:aplikacjadrukomat/map_page.dart'; // Import the mapPage widget
 
 Widget homePage(BuildContext context) {
+  // Get the size of the screen
+  final screenHeight = MediaQuery.of(context).size.height;
+  final screenWidth = MediaQuery.of(context).size.width;
+
   return Padding(
     padding: const EdgeInsets.all(16.0),
     child: Center(
@@ -42,8 +46,10 @@ Widget homePage(BuildContext context) {
             },
             child: Image.asset(
               'images/kartki1.png',
-              height: 400.0,
-              width: 250.0,
+              height: screenHeight * 0.5, // Use 60% of the screen height
+              width: screenWidth * 0.78, // Use 80% of the screen width
+              fit: BoxFit
+                  .contain, // Ensure the image fits within the given dimensions
             ),
           ),
         ],
