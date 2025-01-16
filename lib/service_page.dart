@@ -119,11 +119,18 @@ class _ServiceWidgetState extends State<ServiceWidget> {
     final selectedReport = errorReports.firstWhere(
       (report) => report.errorCode.toString() == dropdownValue,
     );
-
+    String statusDisplay =' ';
+    if(selectedReport.status==1){
+      statusDisplay = 'Resolved';
+    }else if (selectedReport.status==0){
+      statusDisplay = 'Unresolved';
+    }else{
+      statusDisplay = selectedReport.status as String;
+    }
     return Column(
       children: [
         _buildInfoRow('Drukomat Name:', selectedReport.drukomatName),
-        _buildInfoRow('Status:', selectedReport.status ? 'Resolved' : 'Unresolved'),
+        _buildInfoRow('Status:', statusDisplay),
         _buildInfoRow('Error Code:', selectedReport.errorCode.toString()),
         _buildInfoRow('Date:', selectedReport.date.toLocal().toString()),
       ],

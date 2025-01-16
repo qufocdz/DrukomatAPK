@@ -151,12 +151,12 @@ class MongoDB {
     
     print(user!["_id"]);
   try {
-    
+    final userId = user!['_id'] as ObjectId;
     final List<Map<String, dynamic>> reports = await MongoDB.malfunctionCollection
         .find({
           "\$or": [
             {"Status": true},
-            //{"Status": "\$oid 67615ba4a34a5613f6e06304"}
+            {"Status": userId}
           ]
         })
         .toList();
@@ -222,7 +222,7 @@ class ErrorReport {
   final String drukomatName;
   final int errorCode;
   final DateTime date;
-  final bool status;
+  final dynamic status;
   final String? userID;
 
   ErrorReport({
@@ -251,7 +251,7 @@ class ErrorReport {
     drukomatName: map['DrukomatName'],
     errorCode: map['ErrorCode'],
     date: parsedDate,
-    status: map['Status'] as bool,
+    status: map['Status'] as dynamic,
     userID: map['UserID']?['\$oid'],
   );
 } 
