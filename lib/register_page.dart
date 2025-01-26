@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'main_page.dart';
 import 'mongodb.dart'; // MongoDB helper class for connection
 import 'globals.dart';
@@ -31,31 +32,68 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Split the name into first name and last name
-    var nameParts = nameController.text.split(" ");
-    String firstName = nameParts[0];
-    String lastName =
-        nameParts.length > 1 ? nameParts.sublist(1).join(" ") : "";
+    // Check if all fields are filled
+    if (nameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        passwordController.text.isEmpty ||
+        phoneController.text.isEmpty ||
+        streetAndNumberController.text.isEmpty ||
+        postalCodeController.text.isEmpty ||
+        cityController.text.isEmpty ||
+        countryController.text.isEmpty) {
+      showErrorDialog("Wszystkie pola muszą być wypełnione.");
+      return;
+    }
 
-    // Prepare address data
-    final userData = {
-      "FirstName": firstName,
-      "LastName": lastName,
-      "contact": {
-        "email": emailController.text,
-        "phone": phoneController.text,
-        "address": {
-          "StreetAndNumber": streetAndNumberController.text,
-          "PostalCode": postalCodeController.text,
-          "City": cityController.text,
-          "Country": countryController.text,
-        },
-      },
-      "Password": passwordController.text, // Hash this in production!
-      "AccessLevel": 0, // Default access level
-    };
+    // Email validation
+    final email = emailController.text;
+    final emailRegex =
+        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    if (!emailRegex.hasMatch(email)) {
+      showErrorDialog("Podaj prawidłowy adres email.");
+      return;
+    }
+
+    // Phone number validation
+    final phone = phoneController.text;
+    if (!RegExp(r"^[0-9]+$").hasMatch(phone)) {
+      showErrorDialog("Podaj prawidłowy numer telefonu (tylko cyfry).");
+      return;
+    }
 
     try {
+      // Check if an account with the provided email already exists
+      var existingUser =
+          await MongoDB.userCollection.findOne({"contact.email": email});
+      if (existingUser != null) {
+        showErrorDialog("Konto z tym adresem email już istnieje.");
+        return;
+      }
+
+      // Split the name into first name and last name
+      var nameParts = nameController.text.split(" ");
+      String firstName = nameParts[0];
+      String lastName =
+          nameParts.length > 1 ? nameParts.sublist(1).join(" ") : "";
+
+      // Prepare user data
+      final userData = {
+        "FirstName": firstName,
+        "LastName": lastName,
+        "contact": {
+          "email": email,
+          "phone": phone,
+          "address": {
+            "StreetAndNumber": streetAndNumberController.text,
+            "PostalCode": postalCodeController.text,
+            "City": cityController.text,
+            "Country": countryController.text,
+          },
+        },
+        "Password": passwordController.text, // Hash this in production!
+        "AccessLevel": 0, // Default access level
+      };
+
       // Insert the user into the 'User' collection
       var result = await MongoDB.userCollection.insertOne(userData);
 
@@ -218,6 +256,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly
+                      ], // Restrict to digits
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
