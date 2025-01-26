@@ -104,59 +104,83 @@ class _TemplatesPageState extends State<TemplatesPage> {
                             );
                           } else if (snapshot.hasData) {
                             final file = snapshot.data!;
-                            return Card(
-                              elevation: 8,
-                              color: const Color(beige),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      name,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(midnightGreen),
+                            return FutureBuilder<PdfDocument>(
+                              future: PdfDocument.openFile(file.path),
+                              builder: (context, pdfSnapshot) {
+                                if (pdfSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                } else if (pdfSnapshot.hasError) {
+                                  return ListTile(
+                                    title: Text(name),
+                                    subtitle: Text(
+                                        "Error loading PDF: ${pdfSnapshot.error}"),
+                                  );
+                                } else if (pdfSnapshot.hasData) {
+                                  final pdfDocument = pdfSnapshot.data!;
+                                  return Card(
+                                    elevation: 8,
+                                    color: const Color(beige),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            name,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(midnightGreen),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          SizedBox(
+                                            height:
+                                                300, // Adjust height as needed
+                                            child: PdfView(
+                                              controller: PdfController(
+                                                document:
+                                                    Future.value(pdfDocument),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context, {
+                                                'file': file,
+                                                'name': name,
+                                                'encodedFile': pdfBase64,
+                                                'pdfDocument': pdfDocument,
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color(midnightGreen),
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                                "Wybierz ten szablon"),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    SizedBox(
-                                      height: 300, // Adjust height as needed
-                                      child: PdfView(
-                                        controller: PdfController(
-                                          document:
-                                              PdfDocument.openFile(file.path),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context, {
-                                          'file': file,
-                                          'name': name,
-                                          'encodedFile': pdfBase64,
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(midnightGreen),
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                      child: const Text("Wybierz ten szablon"),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  );
+                                } else {
+                                  return Container(); // Handle other cases
+                                }
+                              },
                             );
                           } else {
                             return Container(); // Handle other cases

@@ -8,7 +8,7 @@ import 'globals.dart';
 import 'templates_page.dart';
 
 class AddToOrderPage extends StatefulWidget {
-  const AddToOrderPage({Key? key}) : super(key: key);
+  const AddToOrderPage({super.key});
 
   @override
   State<AddToOrderPage> createState() => _AddToOrderPageState();
@@ -19,61 +19,80 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
   bool isColorPrint = true; // Default is color print
   String selectedFormat = 'A4'; // Default format is A4
   int numberOfCopies = 1; // Default number of copies
-  PdfControllerPinch? pdfController; // Controller for the PDF viewer
+  PdfController? pdfController; // Controller for the PDF viewer
+  PdfDocument? pdfDocument; // Variable to hold the resolved PDF document
   bool isPdfAttached = false; // Flag to indicate if a PDF is attached
   String? base64EncodedFile; // Base64 encoded file content
+  bool isFileUploaded = false; // Flag to control button visibility
 
   // Method to calculate the price based on selected options
   double _calculatePrice() {
-    double basePrice = 0;
+    double basePricePerCopy = 0;
 
+    // Base price based on format
     switch (selectedFormat) {
       case 'A3':
-        basePrice = 3;
+        basePricePerCopy = 3;
         break;
       case 'Photo Paper':
-        basePrice = 5;
+        basePricePerCopy = 5;
         break;
       case 'A4':
       default:
-        basePrice = 1;
+        basePricePerCopy = 1;
     }
 
+    // Double the price for color prints
     if (isColorPrint) {
-      basePrice *= 2; // Double the price for color prints
+      basePricePerCopy *= 1.5;
     }
 
-    return basePrice * numberOfCopies;
+    // Add the number of pages factor
+    int numberOfPages = 0; // Default if no PDF is attached
+    if (isPdfAttached && pdfDocument != null) {
+      numberOfPages = pdfDocument!.pagesCount;
+    }
+
+    // Calculate the final price
+    return basePricePerCopy * numberOfCopies * numberOfPages;
   }
 
+  // Method to update the PDF controller
+  Future<void> _updatePdfController(
+      String newFilePath, PdfDocument document) async {
+    // Dispose of the old controller if it exists
+    pdfController?.dispose();
+
+    // Use the provided document instead of opening a new one
+    pdfDocument = document;
+    pdfController = PdfController(
+      document: Future.value(document),
+    );
+
+    // Update the state to reflect the changes
+    setState(() {
+      isPdfAttached = true;
+      attachedFileName = newFilePath.split('/').last;
+      isFileUploaded = true;
+    });
+  }
+
+  // Method to handle file picking
   Future<void> _pickFile() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
 
-      if (result != null) {
-        PlatformFile file = result.files.first;
+      if (result != null && result.files.single.path != null) {
+        String filePath = result.files.single.path!;
+        PdfDocument document = await PdfDocument.openFile(filePath);
+        _updatePdfController(filePath, document);
 
-        // Dispose the previous PdfControllerPinch
-        pdfController?.dispose();
-
-        setState(() {
-          attachedFileName = file.name;
-          isPdfAttached = file.extension == 'pdf';
-
-          // Reset the pdfController when a new file is picked
-          pdfController = null;
-
-          if (isPdfAttached) {
-            // Only create a new controller if the file is a PDF
-            pdfController = PdfControllerPinch(
-              document: PdfDocument.openFile(file.path!),
-            );
-          }
-
-          // Convert file to Base64
-          File pickedFile = File(file.path!);
-          base64EncodedFile = base64Encode(pickedFile.readAsBytesSync());
-        });
+        // Convert the file to Base64
+        File pickedFile = File(filePath);
+        base64EncodedFile = base64Encode(pickedFile.readAsBytesSync());
 
         print(
             "File converted to Base64: ${base64EncodedFile?.substring(0, 50)}...");
@@ -98,7 +117,7 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
 
   @override
   void dispose() {
-    // Dispose the PdfControllerPinch to free up resources
+    // Dispose the PdfController to free up resources
     pdfController?.dispose();
     super.dispose();
   }
@@ -119,78 +138,67 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Buttons at the top
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _pickFile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(midnightGreen),
-                        foregroundColor: const Color(beige),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        elevation: 8,
-                      ),
-                      child: const Text(
-                        "Dodaj własny druk",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () async {
-                        // Navigate to TemplatesPage and wait for the result
-                        final result = await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const TemplatesPage(),
+              if (!isFileUploaded) ...[
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _pickFile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(midnightGreen),
+                          foregroundColor: const Color(beige),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                        );
-
-                        if (result != null) {
-                          // If a result is returned, update the file, name, and encoded file
-                          final file = result['file'];
-                          final fileName = result['name'];
-                          final encodedFile = result[
-                              'encodedFile']; // Get the Base64-encoded file
-
-                          // Update the state with the selected PDF file, name, and encoded file
-                          setState(() {
-                            attachedFileName = fileName;
-                            isPdfAttached = true;
-                            base64EncodedFile =
-                                encodedFile; // Store the encoded file
-                            // Reset the pdfController to display the new PDF file
-                            pdfController
-                                ?.dispose(); // Dispose previous controller
-                            pdfController = PdfControllerPinch(
-                              document: PdfDocument.openFile(file.path),
-                            );
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(midnightGreen),
-                        foregroundColor: const Color(beige),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                          elevation: 8,
                         ),
-                        elevation: 8,
+                        child: const Text(
+                          "Dodaj własny druk",
+                          style: TextStyle(fontSize: 14),
+                        ),
                       ),
-                      child: const Text(
-                        "Dodaj druk z szablonu",
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    )
-                  ],
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TemplatesPage(),
+                            ),
+                          );
+
+                          if (result != null &&
+                              result['file'] != null &&
+                              result['pdfDocument'] != null) {
+                            PdfDocument document = result['pdfDocument'];
+                            String fileName = result['name'];
+                            base64EncodedFile = result['encodedFile'];
+                            await _updatePdfController(fileName, document);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(midnightGreen),
+                          foregroundColor: const Color(beige),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          elevation: 8,
+                        ),
+                        child: const Text(
+                          "Dodaj druk z szablonu",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+              ],
 
               // Placeholder for attached file display
               if (attachedFileName != null) ...[
@@ -225,6 +233,8 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
+                        // In the Widget tree for displaying PDF
+
                         if (isPdfAttached && pdfController != null)
                           SizedBox(
                             height: 400,
@@ -245,14 +255,12 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: PdfView(
-                                  controller: PdfController(
-                                    document: pdfController!.document,
-                                  ),
+                                  controller: pdfController!,
                                   scrollDirection: Axis.horizontal,
                                 ),
                               ),
                             ),
-                          ),
+                          )
                       ],
                     ),
                   ),
