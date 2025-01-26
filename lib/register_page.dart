@@ -1,7 +1,12 @@
+import 'package:dbcrypt/dbcrypt.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
+
 import 'main_page.dart';
+
 import 'mongodb.dart'; // MongoDB helper class for connection
+
 import 'globals.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -15,24 +20,31 @@ class _RegisterPageState extends State<RegisterPage> {
   bool agreeToTerms = false;
 
   final TextEditingController nameController = TextEditingController();
+
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+
   final TextEditingController phoneController = TextEditingController();
 
-  // New controllers for separate address fields
   final TextEditingController streetAndNumberController =
       TextEditingController();
+
   final TextEditingController postalCodeController = TextEditingController();
+
   final TextEditingController cityController = TextEditingController();
+
   final TextEditingController countryController = TextEditingController();
 
   Future<void> registerUser() async {
     if (!agreeToTerms) {
       showErrorDialog("Musisz wyrazić zgodę na warunki użytkowania.");
+
       return;
     }
 
     // Check if all fields are filled
+
     if (nameController.text.isEmpty ||
         emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
@@ -42,47 +54,79 @@ class _RegisterPageState extends State<RegisterPage> {
         cityController.text.isEmpty ||
         countryController.text.isEmpty) {
       showErrorDialog("Wszystkie pola muszą być wypełnione.");
+
       return;
     }
 
     // Email validation
+
     final email = emailController.text;
+
     final emailRegex =
         RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+
     if (!emailRegex.hasMatch(email)) {
-      showErrorDialog("Podaj prawidłowy adres email.");
+      showErrorDialog("Nieprawidłowy adres email.");
       return;
     }
 
-    // Phone number validation
-    final phone = phoneController.text;
-    if (!RegExp(r"^[0-9]+$").hasMatch(phone)) {
-      showErrorDialog("Podaj prawidłowy numer telefonu (tylko cyfry).");
+    String password = passwordController.text;
+    if (password.length <= 6) {
+      showErrorDialog("Hasło musi mieć conajmniej 6 znaków.");
+      return;
+    }
+    String hashedPassword = hashPassword(password);
+
+    String phoneNumber = phoneController.text;
+    if (phoneNumber.length != 9) {
+      showErrorDialog("Numer telefonu +48 musi mieć dokładnie 9 cyfr.");
+      return;
+    }
+
+    String streetAndNumber = streetAndNumberController.text;
+    if (!RegExp(r"^[a-zA-ZąćęłńóśźżĄĘŁŃÓŚŹŻ\s]+ \d+$")
+        .hasMatch(streetAndNumber)) {
+      showErrorDialog("Podano nieprawidłową ulicę i numer.");
+      return;
+    }
+
+    String postalCode = postalCodeController.text;
+    if (postalCode.length != 6) {
+      showErrorDialog("Kod pocztowy musi mieć dokładnie 5 cyfr.");
       return;
     }
 
     try {
       // Check if an account with the provided email already exists
+
       var existingUser =
           await MongoDB.userCollection.findOne({"contact.email": email});
+
       if (existingUser != null) {
         showErrorDialog("Konto z tym adresem email już istnieje.");
+
         return;
       }
 
       // Split the name into first name and last name
+
       var nameParts = nameController.text.split(" ");
+
       String firstName = nameParts[0];
+
       String lastName =
           nameParts.length > 1 ? nameParts.sublist(1).join(" ") : "";
 
       // Prepare user data
+
       final userData = {
         "FirstName": firstName,
+
         "LastName": lastName,
+
         "contact": {
           "email": email,
-          "phone": phone,
+          "phone": phoneNumber,
           "address": {
             "StreetAndNumber": streetAndNumberController.text,
             "PostalCode": postalCodeController.text,
@@ -90,11 +134,14 @@ class _RegisterPageState extends State<RegisterPage> {
             "Country": countryController.text,
           },
         },
-        "Password": passwordController.text, // Hash this in production!
+
+        "Password": hashedPassword, // Hash this in production!
+
         "AccessLevel": 0, // Default access level
       };
 
       // Insert the user into the 'User' collection
+
       var result = await MongoDB.userCollection.insertOne(userData);
 
       if (result.isSuccess) {
@@ -103,8 +150,11 @@ class _RegisterPageState extends State<RegisterPage> {
         setState(() {
           loggedIn = true;
         });
+
         user = userData;
+
         // Navigate to the main page
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
@@ -115,6 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       showErrorDialog(
           "Rejestracja się nie powiodła. Spróbuj ponownie później.");
+
       print("Error: $e");
     }
   }
@@ -179,6 +230,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r"[a-zA-ZąćęłńóśźżĄĘŁŃÓŚŹŻ\s]")),
+                        LengthLimitingTextInputFormatter(32),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -231,6 +287,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       cursorColor: const Color(midnightGreen),
                       obscureText: true,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(32),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -253,13 +312,21 @@ class _RegisterPageState extends State<RegisterPage> {
                           Icons.phone_outlined,
                           color: Color(richBlack),
                         ),
+                        prefixText: "+48 ",
+                        prefixStyle: TextStyle(
+                          color: Color(richBlack),
+                          fontSize:
+                              16.0, // Adjust this size to match your input text
+                        ),
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly
-                      ], // Restrict to digits
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(
+                            9), // Limit to 9 digits
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -285,6 +352,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(32),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -310,6 +380,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        PostalCodeFormatter(),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -335,6 +410,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r"[a-zA-ZąćęłńóśźżĄĘŁŃÓŚŹŻ\s]")),
+                        LengthLimitingTextInputFormatter(32),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     TextField(
@@ -360,6 +440,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
                       cursorColor: const Color(midnightGreen),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r"[a-zA-ZąćęłńóśźżĄĘŁŃÓŚŹŻ\s]")),
+                        LengthLimitingTextInputFormatter(32),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                     Row(
@@ -410,4 +495,35 @@ class _RegisterPageState extends State<RegisterPage> {
           )
         : const MainPage();
   }
+}
+
+class PostalCodeFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String newText = newValue.text;
+
+    // Allow only digits and check the length for format XX-XXX
+    if (newText.length > 5) {
+      newText = newText.substring(0, 5); // Limit to 5 digits and dash
+    }
+
+    // Insert a dash after the second digit
+    if (newText.length >= 3 && !newText.contains('-')) {
+      newText = newText.substring(0, 2) + '-' + newText.substring(2);
+    }
+
+    // Ensure only digits and dash are included
+    String formattedText = newText.replaceAll(RegExp(r'[^0-9-]'), '');
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
+    );
+  }
+}
+
+String hashPassword(String password) {
+  final bcrypt = DBCrypt();
+  return bcrypt.hashpw(password, r'$2b$06$C6UzMDM.H6dfI/f/IKxGhu');
 }

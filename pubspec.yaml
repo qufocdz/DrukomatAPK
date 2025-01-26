@@ -39,12 +39,13 @@ dependencies:
   file_picker: ^5.2.2
   pdfx: ^2.0.1
   path_provider: ^2.0.13
-
+  dbcrypt: ^2.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  flutter_launcher_icons: "^0.14.1"
+  flutter_launcher_icons: ^0.14.2
 
 flutter_launcher_icons:
   android: "logoplaceholder"
