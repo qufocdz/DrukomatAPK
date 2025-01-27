@@ -47,27 +47,26 @@ class _MainPageState extends State<MainPage> {
       ),
     );
   }
-  
-  
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages;
     int cDots = 2;
-    if(service == true){
+    if (service == true) {
       pages = [
-      homePage(context),
-      secondHomePage(context),
-      thirdHomePage(context),
-    ];
-    cDots = 3;
-    }else{
+        homePage(context),
+        secondHomePage(context),
+        thirdHomePage(context, user ?? {}),
+      ];
+      cDots = 3;
+    } else {
       pages = [
-      homePage(context),
-      secondHomePage(context),
-    ];
-    cDots = 2;
-    };
+        homePage(context),
+        secondHomePage(context),
+      ];
+      cDots = 2;
+    }
+    ;
 
     return Scaffold(
       backgroundColor: const Color(verdigris),

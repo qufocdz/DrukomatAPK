@@ -76,8 +76,10 @@ class MongoDB {
   }
 
   static Future<List<Drukomat>> fetchDrukomats() async {
-    final List<Map<String, dynamic>> data =
-        await MongoDB.drukomatCollection.find(<String, dynamic>{}).toList();
+    final List<Map<String, dynamic>> data = await MongoDB.drukomatCollection
+        .find(
+            where.ne('Status', 0)) // Only find drukomats where Status is not 0
+        .toList();
     if (data.isEmpty) {
       print("No Drukomats found in the database.");
       return [];
@@ -124,6 +126,31 @@ class MongoDB {
     }
   }
 
+  static Future<void> updateReportStatus(
+      ObjectId reportId, ObjectId userId) async {
+    try {
+      await MongoDB.malfunctionCollection.updateOne(
+        where.id(reportId),
+        modify.set('Status', userId),
+      );
+    } catch (e) {
+      print('Error updating report status: $e');
+      rethrow;
+    }
+  }
+
+  static Future<void> resolveReport(ObjectId reportId) async {
+    try {
+      await MongoDB.malfunctionCollection.updateOne(
+        where.id(reportId),
+        modify.set('Status', false),
+      );
+    } catch (e) {
+      print('Error resolving report: $e');
+      rethrow;
+    }
+  }
+
   // Function to fetch Drafts collection and return encoded PDFs
   static Future<List<Map<String, dynamic>>> fetchDrafts() async {
     try {
@@ -152,23 +179,9 @@ class MongoDB {
   }
 
   static Future<List<ErrorReport>> findErrorReports() async {
-    print(user!["_id"]);
     try {
       final List<Map<String, dynamic>> reports =
-          await MongoDB.malfunctionCollection.find({
-        "\$or": [
-          {"Status": true},
-          //{"Status": "\$oid 67615ba4a34a5613f6e06304"}
-        ]
-      }).toList();
-      print(reports);
-
-      if (reports.isEmpty) {
-        print("No error reports found with the given criteria.");
-        return [];
-      }
-
-      // Convert each report into an ErrorReport object
+          await MongoDB.malfunctionCollection.find().toList();
       return reports.map((report) => ErrorReport.fromMap(report)).toList();
     } catch (e) {
       print("Error fetching error reports: $e");
@@ -220,41 +233,39 @@ class Drukomat {
 }
 
 class ErrorReport {
+  final ObjectId id;
   final String drukomatName;
   final int errorCode;
   final DateTime date;
-  final bool status;
-  final String? userID;
-
+  final dynamic status; // Changed to dynamic to handle both bool and ObjectId
+  final ObjectId? userID;
+  final String errorDescription;
+  final String? address;
   ErrorReport({
+    required this.id,
     required this.drukomatName,
     required this.errorCode,
     required this.date,
     required this.status,
+    required this.errorDescription,
+    required this.address,
     this.userID,
   });
 
   factory ErrorReport.fromMap(Map<String, dynamic> map) {
-    // Sprawdź, czy Date jest DateTime, czy obiektem Timestamp
-    DateTime parsedDate;
-    if (map['Date'] is DateTime) {
-      parsedDate =
-          map['Date']; // ISODate jest automatycznie mapowany na DateTime
-    } else if (map['Date'] is Map<String, dynamic> &&
-        map['Date']['t'] != null) {
-      // Obsługa daty jako Timestamp (np. {"t": 1672531200})
-      parsedDate =
-          DateTime.fromMillisecondsSinceEpoch((map['Date']['t'] as int) * 1000);
-    } else {
-      throw ArgumentError("Invalid date format in map['Date']");
-    }
-
     return ErrorReport(
+      id: map['_id'],
       drukomatName: map['DrukomatName'],
       errorCode: map['ErrorCode'],
-      date: parsedDate,
-      status: map['Status'] as bool,
-      userID: map['UserID']?['\$oid'],
+      date: map['Date'] is DateTime
+          ? map['Date']
+          : DateTime.fromMillisecondsSinceEpoch(
+              (map['Date']['t'] as int) * 1000),
+      status: map['Status'],
+      userID:
+          map['Status'] is ObjectId ? map['Status'] : null, // Update this line
+      errorDescription: map['ErrorDescription'],
+      address: map['Address'],
     );
   }
 
