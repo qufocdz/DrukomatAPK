@@ -10,6 +10,9 @@ const COLLECTION_ORDERS = "Orders";
 const COLLECTION_DRUKOMAT = "Drukomat";
 const COLLECTION_DRAFTS = "Drafts";
 const COLLECTION_MALFUNCTION = "Malfunction";
+const COLLECTION_RAPORTS = "Raports";
+const COLLECTION_PRINTING_MODULE = 'PrintingModule';
+const COLLECTION_PRINTER = 'Warehouse';
 
 class MongoDB {
   static late Db db;
@@ -18,7 +21,9 @@ class MongoDB {
   static late DbCollection ordersCollection;
   static late DbCollection draftsCollection;
   static late DbCollection malfunctionCollection;
-
+  static late DbCollection raportsCollection;
+  static late DbCollection printingModuleCollection;
+  static late DbCollection printerCollection;
   // Correcting the connect method
   static Future<void> connect() async {
     db = await Db.create(MONGO_URL); // Correcting the initialization of db
@@ -28,6 +33,9 @@ class MongoDB {
     ordersCollection = db.collection(COLLECTION_ORDERS);
     draftsCollection = db.collection(COLLECTION_DRAFTS);
     malfunctionCollection = db.collection(COLLECTION_MALFUNCTION);
+    raportsCollection = db.collection(COLLECTION_RAPORTS);
+    printingModuleCollection = db.collection(COLLECTION_PRINTING_MODULE);
+    printerCollection = db.collection(COLLECTION_PRINTER);
     print("Database connected and collections initialized.");
   }
 
@@ -148,6 +156,44 @@ class MongoDB {
     } catch (e) {
       print('Error resolving report: $e');
       rethrow;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> findRaports() async {
+    try {
+      final raports = await raportsCollection.find().toList();
+      return raports;
+    } catch (e) {
+      print("Error fetching raports: $e");
+      return [];
+    }
+  }
+
+  static Future<Map<String, dynamic>?> findDrukomatById(ObjectId id) async {
+    try {
+      return await drukomatCollection.findOne({"_id": id});
+    } catch (e) {
+      print("Error fetching drukomat: $e");
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> findPrintingModuleById(
+      ObjectId id) async {
+    try {
+      return await printingModuleCollection.findOne({"_id": id});
+    } catch (e) {
+      print("Error fetching printing module: $e");
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> findPrinterById(ObjectId id) async {
+    try {
+      return await printerCollection.findOne({"_id": id});
+    } catch (e) {
+      print("Error fetching printer: $e");
+      return null;
     }
   }
 
@@ -277,6 +323,59 @@ class ErrorReport {
       'Status': status,
       'UserID': userID,
     };
+  }
+}
+
+class Printer {
+  final String mac;
+  final String model;
+  final String type;
+  final bool isColor;
+  final String size;
+  final int status;
+  final String format;
+  final String paperType;
+  final int paperAmount;
+  final double cyanInk;
+  final double magentaInk;
+  final double yellowInk;
+  final double carbonInk;
+
+  Printer({
+    required this.mac,
+    required this.model,
+    required this.type,
+    required this.isColor,
+    required this.size,
+    required this.status,
+    required this.format,
+    required this.paperType,
+    required this.paperAmount,
+    required this.cyanInk,
+    required this.magentaInk,
+    required this.yellowInk,
+    required this.carbonInk,
+  });
+
+  factory Printer.fromMap(Map<String, dynamic> map) {
+    final printers = map['Printers'];
+    final paper = map['Paper'];
+
+    return Printer(
+      mac: printers['MAC'],
+      model: printers['Model'],
+      type: printers['Type'],
+      isColor: printers['Color'],
+      size: printers['Size'],
+      status: printers['Status'],
+      format: paper['Format'],
+      paperType: paper['Type'],
+      paperAmount: paper['Amount'],
+      cyanInk: map['CyanInk'].toDouble(),
+      magentaInk: map['MagentaInk'].toDouble(),
+      yellowInk: map['YellowInk'].toDouble(),
+      carbonInk: map['CarbonInk'].toDouble(),
+    );
   }
 }
 

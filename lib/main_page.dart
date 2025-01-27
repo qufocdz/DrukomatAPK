@@ -2,6 +2,7 @@ import 'package:aplikacjadrukomat/globals.dart';
 import 'package:aplikacjadrukomat/home_page.dart';
 import 'package:aplikacjadrukomat/home_page_2.dart';
 import 'package:aplikacjadrukomat/home_page_3.dart';
+import 'package:aplikacjadrukomat/home_page_4.dart';
 import 'package:aplikacjadrukomat/settings_page.dart';
 import 'package:flutter/material.dart';
 
@@ -57,8 +58,9 @@ class _MainPageState extends State<MainPage> {
         homePage(context),
         secondHomePage(context),
         thirdHomePage(context, user ?? {}),
+        fourthHomePage(context),
       ];
-      cDots = 3;
+      cDots = 4;
     } else {
       pages = [
         homePage(context),
