@@ -259,36 +259,80 @@ class _OrderingPageState extends State<OrderingPage> {
                               : Column(
                                   children: widget.currentOrderBasket
                                       .map(
-                                        (item) => Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "- ${item['fileName']} (x${item['quantity']})",
-                                              style: const TextStyle(
-                                                color: Color(richBlack),
+                                        (item) => Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: Color(midnightGreen),
+                                                width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
+                                          child: Card(
+                                            margin: EdgeInsets.zero, // Remove default margin
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          item['isTemplate'] ==
+                                                                  true
+                                                              ? item[
+                                                                  'templateName']
+                                                              : item['fileName'] ??
+                                                                  'Dokument',
+                                                          style: const TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                                midnightGreen),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      IconButton(
+                                                        icon: const Icon(
+                                                            Icons.delete,
+                                                            color: Color(
+                                                                richBlack)),
+                                                        onPressed: () =>
+                                                            _removeFromBasket(
+                                                                item),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const Divider(),
+                                                  _buildPrintSettings(item),
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      Text(
+                                                        'Cena: ${item['price'].toStringAsFixed(2)} zł',
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Color(richBlack),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            Text(
-                                              "  Format: ${item['format']}",
-                                              style: const TextStyle(
-                                                color: Color(richBlack),
-                                              ),
-                                            ),
-                                            Text(
-                                              "  Wydruk: ${item['isColorPrint'] ? 'Kolor' : 'Czarnobiały'}",
-                                              style: const TextStyle(
-                                                color: Color(richBlack),
-                                              ),
-                                            ),
-                                            Text(
-                                              "  Cena: ${item['price']} zł",
-                                              style: const TextStyle(
-                                                color: Color(richBlack),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 10),
-                                          ],
+                                          ),
                                         ),
                                       )
                                       .toList(),
@@ -438,5 +482,33 @@ class _OrderingPageState extends State<OrderingPage> {
         ),
       ),
     );
+  }
+
+  // Add this helper method to the class
+  Widget _buildPrintSettings(Map<String, dynamic> item) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Format: ${item['format']}',
+          style: const TextStyle(color: Color(richBlack)),
+        ),
+        Text(
+          'Kopie: ${item['quantity']}',
+          style: const TextStyle(color: Color(richBlack)),
+        ),
+        Text(
+          'Wydruk w kolorze: ${item['isColorPrint'] ? 'Tak' : 'Nie'}',
+          style: const TextStyle(color: Color(richBlack)),
+        ),
+      ],
+    );
+  }
+
+  // Add this helper method to the class
+  void _removeFromBasket(Map<String, dynamic> item) {
+    setState(() {
+      widget.currentOrderBasket.remove(item);
+    });
   }
 }

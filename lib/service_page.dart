@@ -594,8 +594,8 @@ class _ServicePageState extends State<ServicePage> {
                                                                   text: report.status
                                                                           is mongo
                                                                           .ObjectId
-                                                                      ? 'Rozwiązane'
-                                                                      : 'Nierozwiązane',
+                                                                      ? 'Nierozwiązane'
+                                                                      : 'Rozwiązane',
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:

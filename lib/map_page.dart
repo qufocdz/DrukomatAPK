@@ -8,12 +8,12 @@ class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
   @override
-  State<MapPage> createState() => _MapPageState();
+  State<MapPage> createState() => MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
-  final Set<Marker> _markers = {};
+  final Set<Marker> markers = {};
   Drukomat? selectedDrukomat; // To store the selected drukomat
 
   final LatLng _initialPosition =
@@ -35,10 +35,10 @@ class _MapPageState extends State<MapPage> {
       );
 
       setState(() {
-        _markers.clear();
+        markers.clear();
 
         for (var drukomat in drukomats) {
-          _markers.add(Marker(
+          markers.add(Marker(
             markerId: MarkerId(drukomat.name),
             icon: customIcon, // Use the custom icon
             position: drukomat.location,
@@ -87,7 +87,7 @@ class _MapPageState extends State<MapPage> {
                   target: _initialPosition,
                   zoom: 14.0,
                 ),
-                markers: _markers,
+                markers: markers,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
                 zoomControlsEnabled: true,

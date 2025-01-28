@@ -24,6 +24,7 @@ class MongoDB {
   static late DbCollection raportsCollection;
   static late DbCollection printingModuleCollection;
   static late DbCollection printerCollection;
+  static var isConnected = false;
   // Correcting the connect method
   static Future<void> connect() async {
     db = await Db.create(MONGO_URL); // Correcting the initialization of db
@@ -36,6 +37,7 @@ class MongoDB {
     raportsCollection = db.collection(COLLECTION_RAPORTS);
     printingModuleCollection = db.collection(COLLECTION_PRINTING_MODULE);
     printerCollection = db.collection(COLLECTION_PRINTER);
+    isConnected = true;
     print("Database connected and collections initialized.");
   }
 

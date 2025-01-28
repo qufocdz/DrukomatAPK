@@ -37,65 +37,65 @@ Widget settingsPage(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Imię i nazwisko:',
                         style:
                             TextStyle(fontSize: 16, color: Color(electricBlue)),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        '${user?['FirstName'] ?? 'Nie podano'} ${user?['LastName'] ?? ''}',
-                        style: TextStyle(
+                        '${user?['FirstName'] ?? 'Nie podano'} ${user?['LastName'] ?? 'Nie podano'}',
+                        style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
                       ),
-                      SizedBox(height: 12),
-                      Text(
+                      const SizedBox(height: 12),
+                      const Text(
                         'Email:',
                         style:
                             TextStyle(fontSize: 16, color: Color(electricBlue)),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        '${user?['contact']['email']}',
-                        style: TextStyle(
+                        '${user?['contact']['email'] ?? 'Nie podano'}',
+                        style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
                       ),
-                      SizedBox(height: 12),
-                      Text(
+                      const SizedBox(height: 12),
+                      const Text(
                         'Numer telefonu:',
                         style:
                             TextStyle(fontSize: 16, color: Color(electricBlue)),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         '${user?['contact']['phone'] ?? 'Nie podano'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
                       ),
-                      SizedBox(height: 12),
-                      Text(
+                      const SizedBox(height: 12),
+                      const Text(
                         'Adres:',
                         style:
                             TextStyle(fontSize: 16, color: Color(electricBlue)),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         '${user?['contact']?['address']?['StreetAndNumber'] ?? 'Nie podano'}',
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        '${user?['contact']?['address']?['PostalCode'] ?? ''} ${user?['contact']?['address']?['City'] ?? ''}',
-                        style: TextStyle(
+                        '${user?['contact']?['address']?['PostalCode'] ?? 'Nie podano'} ${user?['contact']?['address']?['City'] ?? 'Nie podano'}',
+                        style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.white),
