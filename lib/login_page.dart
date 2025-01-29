@@ -25,8 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final user = await MongoDB.login(
-          email, password); // Zakładam, że MongoDB zwraca dane użytkownika
+      final user = await MongoDB.login(email, password);
       if (user != null) {
         print("Login successful: ${user['contact']['email']}");
 

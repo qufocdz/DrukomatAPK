@@ -4,8 +4,7 @@ import 'package:aplikacjadrukomat/login_page.dart';
 
 Widget settingsPage(BuildContext context) {
   return Scaffold(
-    backgroundColor:
-        const Color(verdigris), // Set the background color to verdigris
+    backgroundColor: const Color(verdigris),
     appBar: AppBar(
       title: const Text("Ustawienia"),
       centerTitle: true,
@@ -14,18 +13,14 @@ Widget settingsPage(BuildContext context) {
       foregroundColor: const Color(electricBlue),
     ),
     body: Center(
-      // Center the content
       child: SingleChildScrollView(
-        // Allows scrolling if content overflows
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisSize:
-                MainAxisSize.min, // Let the Column take the minimum space
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              // Card for user information
               Card(
                 color: const Color(midnightGreen),
                 elevation: 4,
@@ -105,10 +100,8 @@ Widget settingsPage(BuildContext context) {
                 ),
               ),
               const SizedBox(height: 20),
-              // Log out button
               ElevatedButton(
                 onPressed: () {
-                  // Set loggedIn to false and navigate to LoginPage
                   loggedIn = false;
                   user = null;
                   Navigator.pushReplacement(

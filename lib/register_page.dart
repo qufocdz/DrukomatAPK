@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'main_page.dart';
 
-import 'mongodb.dart'; // MongoDB helper class for connection
+import 'mongodb.dart';
 
 import 'globals.dart';
 
@@ -43,8 +43,6 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Check if all fields are filled
-
     if (nameController.text.isEmpty ||
         emailController.text.isEmpty ||
         passwordController.text.isEmpty ||
@@ -57,8 +55,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
       return;
     }
-
-    // Email validation
 
     final email = emailController.text;
 
@@ -97,8 +93,6 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     try {
-      // Check if an account with the provided email already exists
-
       var existingUser =
           await MongoDB.userCollection.findOne({"contact.email": email});
 
@@ -108,8 +102,6 @@ class _RegisterPageState extends State<RegisterPage> {
         return;
       }
 
-      // Split the name into first name and last name
-
       var nameParts = nameController.text.split(" ");
 
       String firstName = nameParts[0];
@@ -117,13 +109,9 @@ class _RegisterPageState extends State<RegisterPage> {
       String lastName =
           nameParts.length > 1 ? nameParts.sublist(1).join(" ") : "";
 
-      // Prepare user data
-
       final userData = {
         "FirstName": firstName,
-
         "LastName": lastName,
-
         "contact": {
           "email": email,
           "phone": phoneNumber,
@@ -134,13 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
             "Country": countryController.text,
           },
         },
-
-        "Password": hashedPassword, // Hash this in production!
-
-        "AccessLevel": 0, // Default access level
+        "Password": hashedPassword,
+        "AccessLevel": 0,
       };
-
-      // Insert the user into the 'User' collection
 
       var result = await MongoDB.userCollection.insertOne(userData);
 
@@ -152,8 +136,6 @@ class _RegisterPageState extends State<RegisterPage> {
         });
 
         user = userData;
-
-        // Navigate to the main page
 
         Navigator.push(
           context,
@@ -315,8 +297,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         prefixText: "+48 ",
                         prefixStyle: TextStyle(
                           color: Color(richBlack),
-                          fontSize:
-                              16.0, // Adjust this size to match your input text
+                          fontSize: 16.0,
                         ),
                         labelStyle: TextStyle(color: Color(richBlack)),
                       ),
@@ -324,8 +305,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       keyboardType: TextInputType.phone,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(
-                            9), // Limit to 9 digits
+                        LengthLimitingTextInputFormatter(9),
                       ],
                     ),
                     const SizedBox(height: 16.0),
@@ -503,17 +483,14 @@ class PostalCodeFormatter extends TextInputFormatter {
       TextEditingValue oldValue, TextEditingValue newValue) {
     String newText = newValue.text;
 
-    // Allow only digits and check the length for format XX-XXX
     if (newText.length > 5) {
-      newText = newText.substring(0, 5); // Limit to 5 digits and dash
+      newText = newText.substring(0, 5);
     }
 
-    // Insert a dash after the second digit
     if (newText.length >= 3 && !newText.contains('-')) {
       newText = newText.substring(0, 2) + '-' + newText.substring(2);
     }
 
-    // Ensure only digits and dash are included
     String formattedText = newText.replaceAll(RegExp(r'[^0-9-]'), '');
 
     return TextEditingValue(

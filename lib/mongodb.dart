@@ -25,9 +25,9 @@ class MongoDB {
   static late DbCollection printingModuleCollection;
   static late DbCollection printerCollection;
   static var isConnected = false;
-  // Correcting the connect method
+
   static Future<void> connect() async {
-    db = await Db.create(MONGO_URL); // Correcting the initialization of db
+    db = await Db.create(MONGO_URL);
     await db.open();
     userCollection = db.collection(COLLECTION_USER);
     drukomatCollection = db.collection(COLLECTION_DRUKOMAT);
@@ -63,7 +63,7 @@ class MongoDB {
       print("Login : |$email| |$password|");
 
       if (userP != null) {
-        user = userP; // Set the global variable
+        user = userP;
         print("User logged in: $user");
         if (userP['AccessLevel'] >= 2) {
           service = true;
@@ -72,47 +72,40 @@ class MongoDB {
         }
         ;
         print("status: ${service}\n");
-        return userP; // Return the user data if found
+        return userP;
       } else {
-        user = null; // Clear user on failed login
+        user = null;
         print("User not found.");
         return null;
       }
     } catch (e) {
       print("Error during login: $e");
-      user = null; // Clear user on error
-      return null; // Return null in case of an error
+      user = null;
+      return null;
     }
   }
 
   static Future<List<Drukomat>> fetchDrukomats() async {
-    final List<Map<String, dynamic>> data = await MongoDB.drukomatCollection
-        .find(
-            where.ne('Status', 0)) // Only find drukomats where Status is not 0
-        .toList();
+    final List<Map<String, dynamic>> data =
+        await MongoDB.drukomatCollection.find(where.ne('Status', 0)).toList();
     if (data.isEmpty) {
       print("No Drukomats found in the database.");
       return [];
     }
 
     List<Drukomat> drukomats = data.map<Drukomat>((item) {
-      print('Item: $item'); // Wyświetla zawartość item
+      print('Item: $item');
       return Drukomat.fromMap(item);
     }).toList();
     return drukomats;
   }
 
-  // Modify the fetchOrders method to accept a userID and filter orders by that userID
   static Future<List<Map<String, dynamic>>> fetchOrders(String userID) async {
     try {
-      // Convert the userID to an ObjectId since MongoDB stores it as ObjectId
       var objectId = ObjectId.fromHexString(userID);
 
-      // Filter the orders collection by the user's ObjectId
-      final List<Map<String, dynamic>> data = await MongoDB.ordersCollection
-          .find(
-              {'UserID': objectId}) // Filter orders by userID (_id in MongoDB)
-          .toList();
+      final List<Map<String, dynamic>> data =
+          await MongoDB.ordersCollection.find({'UserID': objectId}).toList();
 
       if (data.isEmpty) {
         print("No orders found for user: $userID.");
@@ -126,7 +119,6 @@ class MongoDB {
     }
   }
 
-  // Add this method to save orders to the database
   static Future<void> saveOrder(Map<String, dynamic> orderData) async {
     try {
       await MongoDB.ordersCollection.insert(orderData);
@@ -199,10 +191,8 @@ class MongoDB {
     }
   }
 
-  // Function to fetch Drafts collection and return encoded PDFs
   static Future<List<Map<String, dynamic>>> fetchDrafts() async {
     try {
-      // Fetch all documents from the 'Drafts' collection
       final List<Map<String, dynamic>> data =
           await draftsCollection.find(<String, dynamic>{}).toList();
 
@@ -211,13 +201,10 @@ class MongoDB {
         return [];
       }
 
-      // Map and return the results with the base64-encoded PDFs
       return data.map((doc) {
         return {
-          'name':
-              doc['name'], // Can be changed based on the document's metadata
-          'pdfBase64': doc[
-              'encodedFile'], // Assuming 'encodedFile' holds the base64 string
+          'name': doc['name'],
+          'pdfBase64': doc['encodedFile'],
         };
       }).toList();
     } catch (e) {
@@ -285,7 +272,7 @@ class ErrorReport {
   final String drukomatName;
   final int errorCode;
   final DateTime date;
-  final dynamic status; // Changed to dynamic to handle both bool and ObjectId
+  final dynamic status;
   final ObjectId? userID;
   final String errorDescription;
   final String? address;
@@ -310,8 +297,7 @@ class ErrorReport {
           : DateTime.fromMillisecondsSinceEpoch(
               (map['Date']['t'] as int) * 1000),
       status: map['Status'],
-      userID:
-          map['Status'] is ObjectId ? map['Status'] : null, // Update this line
+      userID: map['Status'] is ObjectId ? map['Status'] : null,
       errorDescription: map['ErrorDescription'],
       address: map['Address'],
     );

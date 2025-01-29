@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aplikacjadrukomat/globals.dart';
-import 'selected_order_page.dart'; // Import the page that shows order details
+import 'selected_order_page.dart';
 import 'mongodb.dart';
 
 class OrdersPage extends StatefulWidget {
@@ -11,11 +11,9 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  List<Map<String, dynamic>> orders =
-      []; // To store orders fetched from MongoDB
-  bool isLoading = true; // Track if data is being loaded
+  List<Map<String, dynamic>> orders = [];
+  bool isLoading = true;
 
-  // Function to fetch orders
   Future<void> fetchOrders() async {
     try {
       if (user != null && user!['_id'] != null) {
@@ -65,9 +63,9 @@ class _OrdersPageState extends State<OrdersPage> {
       body: RawScrollbar(
         thumbColor: const Color(midnightGreen),
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : orders.isEmpty
-                ? Center(
+                ? const Center(
                     child:
                         Text("Brak zamówień", style: TextStyle(fontSize: 18)),
                   )
@@ -77,27 +75,23 @@ class _OrdersPageState extends State<OrdersPage> {
                     itemBuilder: (context, index) {
                       final order = orders[index];
 
-                      // Extract CreationDate and ensure it is in DateTime format
-                      final creationDate = order[
-                          "CreationDate"]; // Assuming CreationDate is stored as a Date
+                      final creationDate = order["CreationDate"];
                       final formattedCreationDate =
                           "${creationDate.year}-${creationDate.month.toString().padLeft(2, '0')}-${creationDate.day.toString().padLeft(2, '0')} ${creationDate.hour.toString().padLeft(2, '0')}:${creationDate.minute.toString().padLeft(2, '0')}";
 
                       final orderStatus = getStatus(order["Status"]);
 
                       final orderNumber =
-                          order["CreationDate"].millisecondsSinceEpoch ~/
-                              1000; // Using milliseconds as order number
+                          order["CreationDate"].millisecondsSinceEpoch ~/ 1000;
 
                       return GestureDetector(
                         onTap: () {
-                          // Navigate to the OrderDetailPage when an order is tapped
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SelectedOrderPage(
                                 order: order,
-                              ), // Pass order to the details page
+                              ),
                             ),
                           );
                         },
@@ -109,7 +103,7 @@ class _OrdersPageState extends State<OrdersPage> {
                           color: const Color(beige),
                           child: ListTile(
                             title: Text(
-                              'Nr. druku #$orderNumber', // Use CreationDate for order number
+                              'Nr. druku #$orderNumber',
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,

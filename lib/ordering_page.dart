@@ -17,12 +17,10 @@ class OrderingPage extends StatefulWidget {
 }
 
 class _OrderingPageState extends State<OrderingPage> {
-  // Function to show the confirmation dialog with a customized style
   Future<void> _showExitDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible:
-          false, // Prevent dismissing by tapping outside the dialog
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: const Color(beige),
@@ -44,7 +42,7 @@ class _OrderingPageState extends State<OrderingPage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color(midnightGreen),
@@ -60,8 +58,8 @@ class _OrderingPageState extends State<OrderingPage> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                Navigator.of(context).pop(); // Navigate back to previous page
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color(midnightGreen),
@@ -81,7 +79,6 @@ class _OrderingPageState extends State<OrderingPage> {
     );
   }
 
-  // Method to calculate the total price of the cart
   double _calculateTotalPrice() {
     double totalPrice = 0;
     for (var item in widget.currentOrderBasket) {
@@ -90,22 +87,18 @@ class _OrderingPageState extends State<OrderingPage> {
     return totalPrice;
   }
 
-  // Helper Method for generating a random collection code
   String _generateRandomCollectionCode() {
     final random = Random();
-    final letter = String.fromCharCode(random.nextInt(26) + 65); // A to Z
-    final digits =
-        random.nextInt(100000).toString().padLeft(5, '0'); // Random 5 digits
+    final letter = String.fromCharCode(random.nextInt(26) + 65);
+    final digits = random.nextInt(100000).toString().padLeft(5, '0');
 
-    return '$letter$digits'; // Random collection code, e.g. "A12345"
+    return '$letter$digits';
   }
 
   @override
   Widget build(BuildContext context) {
-    // Split the address into 3 parts (street, city, postal code)
     final addressParts = widget.drukomat.address?.split(',') ?? [];
 
-    // Ensure that we have at least 3 parts, if not, use empty strings
     final street = addressParts.length > 0 ? addressParts[0].trim() : '';
     final city = addressParts.length > 1 ? addressParts[1].trim() : '';
     final postalCode = addressParts.length > 2 ? addressParts[2].trim() : '';
@@ -270,9 +263,10 @@ class _OrderingPageState extends State<OrderingPage> {
                                           margin: const EdgeInsets.symmetric(
                                               vertical: 8.0),
                                           child: Card(
-                                            margin: EdgeInsets.zero, // Remove default margin
+                                            margin: EdgeInsets.zero,
                                             child: Padding(
-                                              padding: const EdgeInsets.all(12.0),
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
                                               child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
@@ -290,7 +284,8 @@ class _OrderingPageState extends State<OrderingPage> {
                                                                   'templateName']
                                                               : item['fileName'] ??
                                                                   'Dokument',
-                                                          style: const TextStyle(
+                                                          style:
+                                                              const TextStyle(
                                                             fontSize: 16,
                                                             fontWeight:
                                                                 FontWeight.bold,
@@ -356,7 +351,7 @@ class _OrderingPageState extends State<OrderingPage> {
                                       'isColorPrint': result['isColorPrint'],
                                       'format': result['format'],
                                       'quantity': result['copies'],
-                                      'price': result['price'], // Add price
+                                      'price': result['price'],
                                       'encodedFile': result['base64File'],
                                     });
                                   });
@@ -421,10 +416,8 @@ class _OrderingPageState extends State<OrderingPage> {
                   onPressed: widget.currentOrderBasket.isEmpty
                       ? null
                       : () {
-                          // Calculate total price and prepare order data
                           double totalPrice = _calculateTotalPrice();
 
-                          // Prepare individual orders for each item
                           List<Map<String, dynamic>> ordersData =
                               widget.currentOrderBasket.map((item) {
                             return {
@@ -445,7 +438,6 @@ class _OrderingPageState extends State<OrderingPage> {
                             };
                           }).toList();
 
-                          // Navigate to PaymentPage with ordersData
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -484,7 +476,6 @@ class _OrderingPageState extends State<OrderingPage> {
     );
   }
 
-  // Add this helper method to the class
   Widget _buildPrintSettings(Map<String, dynamic> item) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,7 +496,6 @@ class _OrderingPageState extends State<OrderingPage> {
     );
   }
 
-  // Add this helper method to the class
   void _removeFromBasket(Map<String, dynamic> item) {
     setState(() {
       widget.currentOrderBasket.remove(item);

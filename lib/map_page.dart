@@ -14,7 +14,7 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late GoogleMapController mapController;
   final Set<Marker> markers = {};
-  Drukomat? selectedDrukomat; // To store the selected drukomat
+  Drukomat? selectedDrukomat;
 
   final LatLng _initialPosition =
       const LatLng(50.86500986794984, 15.68169157995246);
@@ -28,10 +28,9 @@ class MapPageState extends State<MapPage> {
       List<Drukomat> drukomats = await MongoDB.fetchDrukomats();
       print("test $drukomats");
 
-      // Load custom marker icon before setting markers
       final BitmapDescriptor customIcon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(32, 32)), // Optional: Adjust size
-        'images/ikonadrukomat.png', // Your custom icon path
+        const ImageConfiguration(size: Size(32, 32)),
+        'images/ikonadrukomat.png',
       );
 
       setState(() {
@@ -40,7 +39,7 @@ class MapPageState extends State<MapPage> {
         for (var drukomat in drukomats) {
           markers.add(Marker(
             markerId: MarkerId(drukomat.name),
-            icon: customIcon, // Use the custom icon
+            icon: customIcon,
             position: drukomat.location,
             infoWindow: InfoWindow(
               title: drukomat.name,
@@ -48,7 +47,7 @@ class MapPageState extends State<MapPage> {
             ),
             onTap: () {
               setState(() {
-                selectedDrukomat = drukomat; // Set the selected drukomat
+                selectedDrukomat = drukomat;
               });
             },
           ));
@@ -79,7 +78,6 @@ class MapPageState extends State<MapPage> {
         ),
         child: Column(
           children: [
-            // Google Map displaying markers
             Expanded(
               child: GoogleMap(
                 onMapCreated: _onMapCreated,
@@ -93,14 +91,11 @@ class MapPageState extends State<MapPage> {
                 zoomControlsEnabled: true,
                 onTap: (_) {
                   setState(() {
-                    selectedDrukomat =
-                        null; // Unselect the drukomat when tapping on the map
+                    selectedDrukomat = null;
                   });
                 },
               ),
             ),
-
-            // Show selected drukomat info and additional button
             if (selectedDrukomat != null)
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -125,7 +120,6 @@ class MapPageState extends State<MapPage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        // Navigate to the OrderingPage
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -136,11 +130,10 @@ class MapPageState extends State<MapPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: const Color(richBlack),
-                        backgroundColor:
-                            const Color(electricBlue), // Text color on button
+                        backgroundColor: const Color(electricBlue),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 32, vertical: 16),
-                        elevation: 5, // Add shadow to the button
+                        elevation: 5,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),

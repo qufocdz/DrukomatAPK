@@ -23,14 +23,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Verify initial OrderingPage state
       expect(find.text('Twój koszyk jest pusty.'), findsOneWidget);
 
-      // Find the scrollable
       final scrollFinder = find.byType(SingleChildScrollView);
       expect(scrollFinder, findsOneWidget);
 
-      // Scroll to and verify "Dodaj do zamówienia" button
       await tester.dragUntilVisible(
         find.text('Dodaj do zamówienia'),
         scrollFinder,
@@ -38,11 +35,9 @@ void main() {
       );
       expect(find.text('Dodaj do zamówienia'), findsOneWidget);
 
-      // Navigate to AddToOrderPage
       await tester.tap(find.text('Dodaj do zamówienia'));
       await tester.pumpAndSettle();
 
-      // Scroll and verify AddToOrderPage elements
       await tester.dragUntilVisible(
         find.text('Dodaj własny druk'),
         find.byType(SingleChildScrollView),
@@ -57,7 +52,6 @@ void main() {
       );
       expect(find.text('Dodaj druk z szablonu'), findsOneWidget);
 
-      // Scroll to and verify print settings
       await tester.dragUntilVisible(
         find.text('Wydruk w kolorze:'),
         find.byType(SingleChildScrollView),
@@ -65,32 +59,25 @@ void main() {
       );
       expect(find.text('Wydruk w kolorze:'), findsOneWidget);
 
-      // Test print settings
       expect(find.text('Format:'), findsOneWidget);
       expect(find.text('Liczba kopii:'), findsOneWidget);
 
-      // Change print settings
-      await tester.tap(find.byType(Switch).first); // Toggle color print
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
-      // Select format
       await tester.tap(find.text('A4'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('A3').last);
       await tester.pumpAndSettle();
 
-      // Change copies
       await tester.tap(find.byIcon(Icons.add));
       await tester.pumpAndSettle();
 
-      // Verify price calculation
       expect(find.textContaining('zł'), findsOneWidget);
 
-      // Add to basket
       await tester.tap(find.text('Dodaj do koszyka'));
       await tester.pumpAndSettle();
 
-      // Back in OrderingPage, verify basket
       expect(find.text('Koszyk jest pusty'), findsNothing);
       expect(find.text('Zapłać za zamówienie'), findsOneWidget);
     });

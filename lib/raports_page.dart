@@ -16,7 +16,7 @@ class _RaportsPageState extends State<RaportsPage> {
   Map<mongo.ObjectId, Map<String, dynamic>> drukomatDetails = {};
   Map<mongo.ObjectId, Map<String, dynamic>> moduleDetails = {};
   Map<mongo.ObjectId, List<Printer>> printerDetails = {};
-  Map<mongo.ObjectId, bool> expandedStates = {}; // Add this line
+  Map<mongo.ObjectId, bool> expandedStates = {};
 
   @override
   void initState() {
@@ -27,7 +27,6 @@ class _RaportsPageState extends State<RaportsPage> {
   Future<void> _fetchData() async {
     setState(() => isLoading = true);
     try {
-      // Fetch all raports
       final fetchedRaports = await MongoDB.findRaports();
       raports = fetchedRaports;
 
@@ -35,18 +34,15 @@ class _RaportsPageState extends State<RaportsPage> {
         final raportId = raport['_id'] as mongo.ObjectId;
         final drukomatId = raport['drukomatId'] as mongo.ObjectId;
 
-        // Fetch associated drukomat
         final drukomat = await MongoDB.findDrukomatById(drukomatId);
         if (drukomat != null) {
           drukomatDetails[raportId] = drukomat;
 
-          // Fetch associated module
           final moduleId = drukomat['PrintingModule'] as mongo.ObjectId;
           final module = await MongoDB.findPrintingModuleById(moduleId);
           if (module != null) {
             moduleDetails[raportId] = module;
 
-            // Fetch associated printers
             final printerIds = (module['Printers'] as List)
                 .map((printerId) => printerId as mongo.ObjectId)
                 .toList();
@@ -60,7 +56,7 @@ class _RaportsPageState extends State<RaportsPage> {
                 .toList();
           }
         }
-        expandedStates[raportId] = false; // Initialize expanded state
+        expandedStates[raportId] = false;
       }
 
       setState(() {
@@ -107,10 +103,8 @@ class _RaportsPageState extends State<RaportsPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .stretch, // Make children stretch
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // Title section
                             Center(
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -131,7 +125,6 @@ class _RaportsPageState extends State<RaportsPage> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Stats card
                             Card(
                               margin: const EdgeInsets.only(top: 8),
                               shape: RoundedRectangleBorder(
@@ -156,7 +149,6 @@ class _RaportsPageState extends State<RaportsPage> {
                                 ),
                               ),
                             ),
-                            // Module section
                             if (drukomat != null && module != null) ...[
                               const SizedBox(height: 8),
                               GestureDetector(
@@ -222,7 +214,7 @@ class _RaportsPageState extends State<RaportsPage> {
       margin: const EdgeInsets.only(top: 8),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(richBlack), width: 2), // Add border
+        side: const BorderSide(color: Color(richBlack), width: 2),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8),

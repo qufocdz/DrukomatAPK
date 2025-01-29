@@ -16,20 +16,18 @@ class AddToOrderPage extends StatefulWidget {
 
 class _AddToOrderPageState extends State<AddToOrderPage> {
   String? attachedFileName;
-  bool isColorPrint = true; // Default is color print
-  String selectedFormat = 'A4'; // Default format is A4
-  int numberOfCopies = 1; // Default number of copies
-  PdfController? pdfController; // Controller for the PDF viewer
-  PdfDocument? pdfDocument; // Variable to hold the resolved PDF document
-  bool isPdfAttached = false; // Flag to indicate if a PDF is attached
-  String? base64EncodedFile; // Base64 encoded file content
-  bool isFileUploaded = false; // Flag to control button visibility
+  bool isColorPrint = true;
+  String selectedFormat = 'A4';
+  int numberOfCopies = 1;
+  PdfController? pdfController;
+  PdfDocument? pdfDocument;
+  bool isPdfAttached = false;
+  String? base64EncodedFile;
+  bool isFileUploaded = false;
 
-  // Method to calculate the price based on selected options
   double _calculatePrice() {
     double basePricePerCopy = 0;
 
-    // Base price based on format
     switch (selectedFormat) {
       case 'A3':
         basePricePerCopy = 3;
@@ -42,34 +40,27 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
         basePricePerCopy = 1;
     }
 
-    // Double the price for color prints
     if (isColorPrint) {
       basePricePerCopy *= 1.5;
     }
 
-    // Add the number of pages factor
-    int numberOfPages = 0; // Default if no PDF is attached
+    int numberOfPages = 0;
     if (isPdfAttached && pdfDocument != null) {
       numberOfPages = pdfDocument!.pagesCount;
     }
 
-    // Calculate the final price
     return basePricePerCopy * numberOfCopies * numberOfPages;
   }
 
-  // Method to update the PDF controller
   Future<void> _updatePdfController(
       String newFilePath, PdfDocument document) async {
-    // Dispose of the old controller if it exists
     pdfController?.dispose();
 
-    // Use the provided document instead of opening a new one
     pdfDocument = document;
     pdfController = PdfController(
       document: Future.value(document),
     );
 
-    // Update the state to reflect the changes
     setState(() {
       isPdfAttached = true;
       attachedFileName = newFilePath.split('/').last;
@@ -77,7 +68,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
     });
   }
 
-  // Method to handle file picking
   Future<void> _pickFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -90,7 +80,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
         PdfDocument document = await PdfDocument.openFile(filePath);
         _updatePdfController(filePath, document);
 
-        // Convert the file to Base64
         File pickedFile = File(filePath);
         base64EncodedFile = base64Encode(pickedFile.readAsBytesSync());
 
@@ -104,7 +93,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
     }
   }
 
-  // Function to handle changes in number of copies
   void _changeCopies(bool increase) {
     setState(() {
       if (increase) {
@@ -117,7 +105,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
 
   @override
   void dispose() {
-    // Dispose the PdfController to free up resources
     pdfController?.dispose();
     super.dispose();
   }
@@ -125,11 +112,11 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(verdigris), // Background color
+      backgroundColor: const Color(verdigris),
       appBar: AppBar(
         title: const Center(child: Text("Dodaj do zamówienia")),
-        backgroundColor: const Color(midnightGreen), // Use midnightGreen
-        foregroundColor: const Color(electricBlue), // Use electricBlue
+        backgroundColor: const Color(midnightGreen),
+        foregroundColor: const Color(electricBlue),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -137,7 +124,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Buttons at the top
               if (!isFileUploaded) ...[
                 Center(
                   child: Column(
@@ -199,8 +185,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                 ),
                 const SizedBox(height: 20),
               ],
-
-              // Placeholder for attached file display
               if (attachedFileName != null) ...[
                 Card(
                   elevation: 5,
@@ -233,8 +217,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // In the Widget tree for displaying PDF
-
                         if (isPdfAttached && pdfController != null)
                           SizedBox(
                             height: 400,
@@ -267,8 +249,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                 ),
                 const SizedBox(height: 20),
               ],
-
-              // Print settings card
               Card(
                 elevation: 5,
                 color: const Color(beige),
@@ -279,7 +259,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      // Color or Black & White option
                       const Text(
                         "Wydruk w kolorze:",
                         style: TextStyle(
@@ -301,8 +280,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                         inactiveTrackColor: const Color(beige),
                       ),
                       const SizedBox(height: 10),
-
-                      // Format selection (A4, A3, Photo Paper)
                       const Text(
                         "Format:",
                         style: TextStyle(
@@ -337,8 +314,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-
-                      // Number of copies counter
                       const Text(
                         "Liczba kopii:",
                         style: TextStyle(
@@ -369,8 +344,6 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Display the calculated price
               Card(
                 elevation: 5,
                 color: const Color(beige),
@@ -402,14 +375,12 @@ class _AddToOrderPageState extends State<AddToOrderPage> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Button to go back to the OrderingPage with the price included
               Center(
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop({
                       'file': attachedFileName,
-                      'base64File': base64EncodedFile, // Send Base64 data
+                      'base64File': base64EncodedFile,
                       'isColorPrint': isColorPrint,
                       'format': selectedFormat,
                       'copies': numberOfCopies,

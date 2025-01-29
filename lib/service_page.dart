@@ -44,7 +44,6 @@ class _ServicePageState extends State<ServicePage> {
     }
   }
 
-  // Add helper method for date formatting
   String _formatDate(DateTime date) {
     final months = [
       'stycznia',

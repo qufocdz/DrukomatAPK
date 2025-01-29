@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'globals.dart';
-import 'mongodb.dart'; // Import the MongoDB helper for database operations
-import 'dart:math'; // For generating random collection code
+import 'mongodb.dart';
+import 'dart:math';
 
 class PaymentPage extends StatefulWidget {
   final double totalPrice;
-  final List<Map<String, dynamic>> orders; // Change to accept multiple orders
+  final List<Map<String, dynamic>> orders;
 
-  // Constructor to receive the total price and order data (multiple orders)
   const PaymentPage({Key? key, required this.totalPrice, required this.orders})
       : super(key: key);
 
@@ -17,19 +16,15 @@ class PaymentPage extends StatefulWidget {
 
 class _PaymentPageState extends State<PaymentPage> {
   final TextEditingController _blikController = TextEditingController();
-  bool isProcessing = false; // State to indicate loading and block UI
+  bool isProcessing = false;
 
-  // Generate random CollectionCode in the format of a capital letter followed by 5 digits
   String generateCollectionCode() {
     final random = Random();
-    final letter =
-        String.fromCharCode(random.nextInt(26) + 65); // Random letter (A-Z)
-    final digits = List.generate(5, (index) => random.nextInt(10))
-        .join(); // Random 5 digits
+    final letter = String.fromCharCode(random.nextInt(26) + 65);
+    final digits = List.generate(5, (index) => random.nextInt(10)).join();
     return '$letter$digits';
   }
 
-  // Method to check if the BLIK code is valid (exactly 6 digits)
   bool isBLIKCodeValid() {
     return _blikController.text.length == 6;
   }
@@ -46,7 +41,6 @@ class _PaymentPageState extends State<PaymentPage> {
             foregroundColor: const Color(electricBlue),
           ),
           body: SingleChildScrollView(
-            // Wrap the body with SingleChildScrollView to prevent overflow
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -81,8 +75,6 @@ class _PaymentPageState extends State<PaymentPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
-
-                // BLIK Code Input
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: TextField(
@@ -108,27 +100,23 @@ class _PaymentPageState extends State<PaymentPage> {
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
-                      counterText: '', // Hide counter
+                      counterText: '',
                     ),
                     onChanged: (text) {
-                      setState(
-                          () {}); // Update the state when the BLIK code changes
+                      setState(() {});
                     },
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // Confirm Payment Button
                 ElevatedButton(
                   onPressed: isBLIKCodeValid() && !isProcessing
                       ? () async {
                           setState(() {
-                            isProcessing = true; // Block user interaction
+                            isProcessing = true;
                           });
 
                           try {
-                            // Simulate payment success
-                            bool paymentSuccess = true; // Mocked payment status
+                            bool paymentSuccess = true;
 
                             if (paymentSuccess) {
                               for (var orderData in widget.orders) {
@@ -145,7 +133,6 @@ class _PaymentPageState extends State<PaymentPage> {
                                 await MongoDB.saveOrder(orderToSave);
                               }
 
-                              // Show success message
                               showDialog(
                                 context: context,
                                 builder: (context) => AlertDialog(
@@ -211,7 +198,7 @@ class _PaymentPageState extends State<PaymentPage> {
                             );
                           } finally {
                             setState(() {
-                              isProcessing = false; // Allow user interaction
+                              isProcessing = false;
                             });
                           }
                         }
@@ -235,16 +222,12 @@ class _PaymentPageState extends State<PaymentPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 40),
-
-                // Cancel Button
                 TextButton(
                   onPressed: isProcessing
                       ? null
                       : () {
-                          Navigator.pop(
-                              context); // Go back to the ordering page
+                          Navigator.pop(context);
                         },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -266,14 +249,12 @@ class _PaymentPageState extends State<PaymentPage> {
             ),
           ),
         ),
-
-        // Full-Screen Loading Overlay
         if (isProcessing)
           Container(
-            color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+            color: Colors.black.withOpacity(0.5),
             child: const Center(
               child: CircularProgressIndicator(
-                color: Colors.white, // Loading indicator
+                color: Colors.white,
               ),
             ),
           ),

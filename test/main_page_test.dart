@@ -12,20 +12,16 @@ void main() {
       service = true;
       await tester.pumpWidget(createMainPage());
 
-      // Check initial state
       expect(find.byType(PageView), findsOneWidget);
-      expect(find.byType(Container), findsNWidgets(4)); // 4 dot indicators
+      expect(find.byType(Container), findsNWidgets(4));
 
-      // Swipe through pages
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
       await tester.pumpAndSettle();
 
-      // Verify page changed
       final pageController =
           tester.widget<PageView>(find.byType(PageView)).controller;
       expect(pageController!.page, 1);
 
-      // Continue to last page
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
       await tester.pumpAndSettle();
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
@@ -39,17 +35,14 @@ void main() {
       service = false;
       await tester.pumpWidget(createMainPage());
 
-      // Check initial state
       expect(find.byType(PageView), findsOneWidget);
-      expect(find.byType(Container), findsNWidgets(2)); // 2 dot indicators
+      expect(find.byType(Container), findsNWidgets(2));
 
-      // Try to swipe to third page (shouldn't exist)
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
       await tester.pumpAndSettle();
       await tester.drag(find.byType(PageView), const Offset(-500, 0));
       await tester.pumpAndSettle();
 
-      // Verify we're still on last available page
       final pageController =
           tester.widget<PageView>(find.byType(PageView)).controller;
       expect(pageController!.page, 1);
@@ -63,7 +56,6 @@ void main() {
       await tester.tap(find.byIcon(Icons.settings));
       await tester.pumpAndSettle();
 
-      // Verify navigation occurred
       expect(find.byType(Navigator), findsOneWidget);
     });
   });

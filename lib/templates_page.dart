@@ -4,7 +4,7 @@ import 'package:pdfx/pdfx.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'globals.dart';
-import 'mongodb.dart'; // Import your MongoDB class
+import 'mongodb.dart';
 
 class TemplatesPage extends StatefulWidget {
   const TemplatesPage({Key? key}) : super(key: key);
@@ -23,7 +23,6 @@ class _TemplatesPageState extends State<TemplatesPage> {
     _fetchDrafts();
   }
 
-  // Fetch drafts from MongoDB
   Future<void> _fetchDrafts() async {
     try {
       final fetchedDrafts = await MongoDB.fetchDrafts();
@@ -39,7 +38,6 @@ class _TemplatesPageState extends State<TemplatesPage> {
     }
   }
 
-  // Decode base64 string and save the PDF to a file
   Future<File> _decodeAndSavePdf(String base64String, String fileName) async {
     try {
       final bytes = base64Decode(base64String);
@@ -47,10 +45,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
         throw Exception("Decoded bytes are empty. Invalid base64 string.");
       }
 
-      final dir =
-          await getApplicationDocumentsDirectory(); // App's internal directory
-      final file =
-          File('${dir.path}/$fileName'); // Create a file in the directory
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/$fileName');
 
       await file.writeAsBytes(bytes);
       return file;
@@ -60,7 +56,6 @@ class _TemplatesPageState extends State<TemplatesPage> {
     }
   }
 
-  // Build the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,8 +137,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
                                           ),
                                           const SizedBox(height: 8),
                                           SizedBox(
-                                            height:
-                                                300, // Adjust height as needed
+                                            height: 300,
                                             child: PdfView(
                                               controller: PdfController(
                                                 document:
@@ -178,12 +172,12 @@ class _TemplatesPageState extends State<TemplatesPage> {
                                     ),
                                   );
                                 } else {
-                                  return Container(); // Handle other cases
+                                  return Container();
                                 }
                               },
                             );
                           } else {
-                            return Container(); // Handle other cases
+                            return Container();
                           }
                         },
                       );

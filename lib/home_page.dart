@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aplikacjadrukomat/globals.dart';
-import 'package:aplikacjadrukomat/map_page.dart'; // Import the mapPage widget
+import 'package:aplikacjadrukomat/map_page.dart';
 
 Widget homePage(BuildContext context) {
-  // Get the size of the screen
   final screenHeight = MediaQuery.of(context).size.height;
   final screenWidth = MediaQuery.of(context).size.width;
 
@@ -24,7 +23,7 @@ Widget homePage(BuildContext context) {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               child: Text(
-                'Witaj, ${user?['FirstName']} ${user?['LastName']}!', // No `const` here
+                'Witaj, ${user?['FirstName']} ${user?['LastName']}!',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -46,10 +45,9 @@ Widget homePage(BuildContext context) {
             },
             child: Image.asset(
               'images/kartki1.png',
-              height: screenHeight * 0.5, // Use 60% of the screen height
-              width: screenWidth * 0.78, // Use 80% of the screen width
-              fit: BoxFit
-                  .contain, // Ensure the image fits within the given dimensions
+              height: screenHeight * 0.5,
+              width: screenWidth * 0.78,
+              fit: BoxFit.contain,
             ),
           ),
         ],

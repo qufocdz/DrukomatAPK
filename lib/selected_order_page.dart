@@ -4,39 +4,31 @@ import 'globals.dart';
 class SelectedOrderPage extends StatelessWidget {
   final Map<String, dynamic> order;
 
-  // Constructor to receive the order data
   SelectedOrderPage({Key? key, required this.order}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Extracting order details
-    final creationDate = order[
-        "CreationDate"]; // Using toDate() to convert Firestore Date to DateTime
+    final creationDate = order["CreationDate"];
     final formattedDate =
         "${creationDate.year}-${creationDate.month.toString().padLeft(2, '0')}-${creationDate.day.toString().padLeft(2, '0')} ${creationDate.hour.toString().padLeft(2, '0')}:${creationDate.minute.toString().padLeft(2, '0')}";
 
     final orderStatus = getStatus(order["Status"]);
 
-    // Extracting file information
     final file = order["File"];
     final quantity = file["quantity"];
     final color = file["isColorPrint"];
     final format = file["format"];
     final userFile = file["fileName"];
-    final orderNumber = (creationDate.millisecondsSinceEpoch / 1000)
-        .toInt(); // Use milliseconds for order number
+    final orderNumber = (creationDate.millisecondsSinceEpoch / 1000).toInt();
 
-    // Extract and format the completion date from the database
     String? formattedCompletionDate;
     if (order["CompletionDate"] != null &&
         (order["Status"] == 3 || order["Status"] == 4)) {
-      final completionDate = order["CompletionDate"]
-          .toDate(); // Convert Firestore Date to DateTime
+      final completionDate = order["CompletionDate"].toDate();
       formattedCompletionDate =
           "${completionDate.year}-${completionDate.month.toString().padLeft(2, '0')}-${completionDate.day.toString().padLeft(2, '0')} ${completionDate.hour.toString().padLeft(2, '0')}:${completionDate.minute.toString().padLeft(2, '0')}";
     }
 
-    // Extract collection code if status is 3
     final collectionCode = order["CollectionCode"];
 
     return Scaffold(
@@ -51,7 +43,6 @@ class SelectedOrderPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // Card with status, creation date, and completion date
             _buildDetailCard(
               context,
               title: 'Informacje o realizacji zamówienia',
@@ -63,7 +54,6 @@ class SelectedOrderPage extends StatelessWidget {
                       'Data wydrukowania:', formattedCompletionDate),
               ],
             ),
-            // Grouped card for file information
             _buildDetailCard(
               context,
               title: 'Informacje o druku',
@@ -74,7 +64,6 @@ class SelectedOrderPage extends StatelessWidget {
                 _buildOrderDetailRow('Nazwa pliku:', userFile),
               ],
             ),
-            // Collection code card (only if status is 3)
             if (order["Status"] == 3)
               _buildCollectionCodeCard(context, collectionCode),
           ],
@@ -83,7 +72,6 @@ class SelectedOrderPage extends StatelessWidget {
     );
   }
 
-  // Helper method to create a unified styled card
   Widget _buildDetailCard(BuildContext context,
       {required String title, required List<Widget> details}) {
     return Card(
@@ -112,13 +100,12 @@ class SelectedOrderPage extends StatelessWidget {
     );
   }
 
-  // Helper method to create the collection code card
   Widget _buildCollectionCodeCard(BuildContext context, String collectionCode) {
     return Card(
       elevation: 6,
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.amber.shade300, // A distinct color from the current palette
+      color: Colors.amber.shade300,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -148,7 +135,6 @@ class SelectedOrderPage extends StatelessWidget {
     );
   }
 
-  // Helper method to create individual rows in the card
   Widget _buildOrderDetailRow(String label, String content) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
@@ -178,7 +164,6 @@ class SelectedOrderPage extends StatelessWidget {
     );
   }
 
-  // Helper function to map status number to text
   String getStatus(int? status) {
     switch (status) {
       case 1:
