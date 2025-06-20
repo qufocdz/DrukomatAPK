@@ -1,16 +1,3 @@
-# aplikacjadrukomat
-
-Aplikacja do obslugi drukomatu
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Drukomat Mobile Application in Flutter
+## Short info
+A Flutter mobile application which is a part of a bigger system that allows users for creating orders and service workers for receiving info about current issues with a system of devices for public printing.
